@@ -1,0 +1,80 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash({{PKG_MGR}} *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      {{EXTRA_ALLOW}}
+      "Bash(jq *)"
+    ],
+    "deny": [
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(rm -rf /)"
+      {{EXTRA_DENY}}
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{HOOK_CMD_BRANCH}}",
+            "timeout": 5
+          }
+        ]
+      }
+      {{MOCKUP_HOOK}}
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{HOOK_CMD_NAG}}",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date -u +%Y-%m-%dT%H:%M:%SZ)] CHANGED: $(echo $CLAUDE_TOOL_INPUT | jq -r '.path // .file_path // \"unknown\"')\" >> docs/sessions/changes.log 2>/dev/null || true",
+            "timeout": 3
+          }
+        ]
+      }
+      {{SCHEMA_REMINDER_HOOK}}
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{HOOK_CMD_SNAPSHOT}} 2>/dev/null || true",
+            "timeout": 15
+          }
+          {{TOKEN_LEDGER_HOOK}}
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"\n{{PROJECT_NAME}} Session Started\nBranch: $(git branch --show-current)\nLast commit: $(git log --oneline -1)\n\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

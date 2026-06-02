@@ -1,0 +1,62 @@
+# {{PROJECT_NAME}} — Developer Playbook
+
+> **Loaded on demand.** Claude does NOT auto-load this file. Human devs read it. Claude reads `CLAUDE.md`.
+
+## 1. What this is
+
+This playbook describes how humans and Claude collaborate to ship features in {{PROJECT_NAME}}. The short version: Claude is your pair programmer; tickets are the contract between you; the pipeline is enforced by hooks.
+
+## 2. The mental model
+
+1. **Tickets are the design artifact.** Before code, there's a ticket. Before a ticket is built, it's approved. This is the quality gate.
+2. **Claude does the build; you do the decisions.** Claude writes code, commits, manages state. You answer the interview questions, approve designs, and merge PRs.
+3. **The hook system is your guardrail.** You can't accidentally push to protected branches. You can't edit committed migrations. The system prevents the costly mistakes.
+
+## 3. Your toolkit
+
+| Tool | Purpose | How to invoke |
+|------|---------|---------------|
+| `/new-feature {slug}` | Start a feature (interview → ticket) | Type in Claude |
+| `/groom-ticket {id}` | Deep-design a ticket | Type in Claude |
+{{REVIEW_TICKET_ROW}}
+| `/claim-ticket {id}` | Pick up an approved ticket | Type in Claude |
+| `/complete-feature {slug}` | Pre-merge gate + PR | Type in Claude |
+| `/handoff` | Save state and pause | Type in Claude |
+| `/resume-session` | Restore context and continue | Type in Claude |
+{{DEPLOY_ROWS}}
+
+## 4. The end-to-end workflow
+
+**Day 1 (design):**
+1. `git switch {{BASE_BRANCH}} && git pull`
+2. `/new-feature {slug}` — answer the interview, get a ticket.
+{{GROOM_STEP}}
+{{REVIEW_STEP}}
+
+**Day 2 (build):**
+1. `/claim-ticket {id}` (or continue from yesterday's context with `--continue`)
+2. Schema first → API tests-first → API impl → Web UI → Mobile UI.
+3. After each layer: `/handoff` to save state, `git push`.
+
+**Day 3 (ship):**
+1. `/complete-feature {slug}` — checklist + code-reviewer agent + PR opened.
+2. Lead reviews PR → merges to `{{PR_TARGET_BRANCH}}`.
+3. When ready for dev environment: `/dev-deploy`.
+4. When ready for prod: `/prod-deploy`.
+
+## 5. Commit message format
+
+```
+type(scope): description (TICKET-XXX) <= 72 chars
+
+What changed, why it was needed.
+Any follow-up tickets or gotchas.
+```
+
+Types: `feat` · `fix` · `chore` · `refactor` · `test` · `docs`
+
+## 6. Where to ask for help
+
+- Stuck on Claude behavior: check `CLAUDE.md` → "When you're stuck".
+- Stuck on design: read the relevant skill (`/how-it-works` in Claude for skill docs).
+- Stuck on team process: re-read this file and `docs/TEAM.md`.

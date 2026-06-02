@@ -1,0 +1,56 @@
+# {{PROJECT_NAME}} — Claude Operating Manual
+
+> **Loaded every session.** Keep short. Anything you can derive from code, git, or skills does NOT belong here.
+
+## Project
+
+**{{PROJECT_NAME}}** — {{PROJECT_DESCRIPTION}}
+
+## Stack
+
+| Layer | Tech | Path |
+|-------|------|------|
+{{STACK_TABLE}}
+
+## Commands cheat sheet
+
+```bash
+{{COMMANDS_CHEAT_SHEET}}
+```
+
+## Code rules — non-negotiable (universal)
+
+{{CODE_RULES}}
+
+## Domain map
+
+| Domain | Tables / Modules | Status |
+|--------|-----------------|--------|
+{{DOMAIN_MAP}}
+
+## Available agents
+
+{{AGENTS_LIST}}
+
+## Available skills
+
+{{SKILLS_LIST}}
+
+## Slash commands
+
+{{COMMANDS_LIST}}
+
+{{TICKET_PIPELINE_NOTE}}
+
+## Before starting any work
+
+1. Read `docs/STATE.md` — what's the active session?
+2. Read `docs/tickets/_active.md` — who owns what?
+3. `git status` + `git log --oneline -5` — confirm clean state.
+4. Run `{{GENERATE_CMD}}` if `{{SCHEMA_FILE}}` was recently changed.
+
+## When you're stuck or context is full
+
+- `/clear` between unrelated tasks.
+- `Esc-Esc` or `/rewind` to undo a misstep.
+- Use a subagent (`> use the code-reviewer agent to ...`) to investigate without polluting your context.

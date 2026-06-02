@@ -1,0 +1,12 @@
+# backup dirs created by installer
+setup.bak-*/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/
+*.swp
