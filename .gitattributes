@@ -1,0 +1,13 @@
+# Normalize line endings
+* text=auto
+
+# Shell scripts must always have LF — CRLF breaks sh/bash on Mac/Linux
+*.sh text eol=lf
+
+# PowerShell scripts — CRLF is fine on Windows, but LF also works
+*.ps1 text eol=lf
+
+# Templates and markdown — normalize to LF
+*.md text eol=lf
+*.tmpl text eol=lf
+*.json text eol=lf
