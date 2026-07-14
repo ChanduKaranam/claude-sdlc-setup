@@ -22,6 +22,7 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 {{REVIEW_TICKET_ROW}}
 | `/claim-ticket {id}` | Pick up an approved ticket | Type in Claude |
 | `/build-ticket {slug}` | **Write the code.** Executes the ticket's Implementation Plan under TDD | Type in Claude |
+| `/fix-bug {slug}` | Something shipped is broken. Reproduce → root cause → your confirmation → test-first fix | Type in Claude |
 | `/complete-feature {slug}` | Pre-merge gate + PR | Type in Claude |
 | `/handoff` | Save state and pause | Type in Claude |
 | `/resume-session` | Restore context and continue | Type in Claude |
@@ -47,6 +48,18 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 2. Lead reviews PR → merges to `{{PR_TARGET_BRANCH}}`.
 3. When ready for dev environment: `/dev-deploy`.
 4. When ready for prod: `/prod-deploy`.
+
+## 4b. When something breaks
+
+`/fix-bug {slug}`. It does not go straight to the code, and that is deliberate:
+
+1. **It grills the report.** One question at a time. What did you expect, what happened, the exact steps, every time or sometimes. It looks up whatever it can find itself (the parent ticket, when it last worked, whether a test covers that path) rather than asking you.
+2. **It reproduces the bug before theorising about it.** If it can't reproduce it, it stops and tells you — rather than shipping a plausible fix for something nobody has seen.
+3. **It traces the root cause, then stops.** You get the diagnosis, the evidence, and the *blast radius* — every caller of the broken function, and which of them the reported path never mentioned. Nothing gets written until you confirm it.
+4. **The failing test comes before the fix.** It must fail against the unfixed code, for the right reason. Then the fix goes in at the root — once, where the callers route through, not once per caller.
+5. **It proves the red-green**: reverts the fix, watches the test fail, restores it. A regression test you have never seen fail is not testing anything.
+
+Then `/complete-feature` ships it through the same gates a feature gets. A one-line fix that skips the gates is how the next bug gets in.
 
 ## 5. Commit message format
 

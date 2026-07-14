@@ -19,6 +19,7 @@ The generated pipeline is not a set of freehand instructions. Every phase runs a
 | Plan | same command | `superpowers:writing-plans` → the ticket's `## Implementation Plan` |
 | Design review | `/review-ticket` (team) | `grilling` + `ponytail:ponytail-review` on the plan |
 | Build | `/build-ticket` | `superpowers:subagent-driven-development` or `executing-plans`, `test-driven-development` per task, `systematic-debugging` on failure, `requesting-code-review` + `receiving-code-review` per task |
+| Fix | `/fix-bug` | `grilling` on the report, `systematic-debugging` to root cause, **a hard stop for human confirmation of the diagnosis**, then `test-driven-development` (failing reproduction test first) and `verification-before-completion` (red-green proven) |
 | Ship | `/complete-feature` | `superpowers:verification-before-completion`, both review lenses, `ponytail:ponytail-debt`, `finishing-a-development-branch` |
 
 ## When to invoke
@@ -235,15 +236,18 @@ LAYER 6 — .claude/commands/
 Read from ~/.claude/skills/setup/templates/commands/full/ (team) or .../lite/ (solo).
 Fill all {{PLACEHOLDER}} tokens. Write to .claude/commands/{name}.md.
 
-Full (10): new-feature, groom-ticket, review-ticket, claim-ticket, **build-ticket**, complete-feature, handoff, resume-session, dev-deploy, prod-deploy.
-Lite (6): new-feature, work-ticket, **build-ticket**, complete-feature, handoff, resume-session.
+Full (11): new-feature, groom-ticket, review-ticket, claim-ticket, **build-ticket**, **fix-bug**, complete-feature, handoff, resume-session, dev-deploy, prod-deploy.
+Lite (7): new-feature, work-ticket, **build-ticket**, **fix-bug**, complete-feature, handoff, resume-session.
 
 `build-ticket` is where code gets written. Without it the pipeline designs a feature and then stops at the edge of implementing it.
+
+`fix-bug` is the same discipline pointed at a shipped feature: grill the report, reproduce it, trace the root cause, **stop for human confirmation of the diagnosis**, then failing-test-first and fix at the root. It writes a slim BUG ticket rather than dragging a two-line fix through the feature template, and it hands off to `/complete-feature` rather than duplicating its gates.
 
 LAYER 7 — docs/
 Create directories if missing: docs/tickets, docs/decisions, docs/sessions
 Write (skip if exists):
 - docs/tickets/_TEMPLATE.md ← templates/docs/tickets/_TEMPLATE.md (fill surface-specific placeholders). Its `## Implementation Plan` section is the contract between the design commands and `/build-ticket` — keep its task structure (Files / Interfaces / TDD checkbox steps) intact.
+- docs/tickets/_BUG_TEMPLATE.md ← templates/docs/tickets/_BUG_TEMPLATE.md (no placeholders — copy verbatim). The slim ticket `/fix-bug` writes: symptom, reproduction, root cause, blast radius, the fix, the regression test. Its `## Root Cause` and `## Blast Radius` sections are what the human confirms before any code is written.
 - docs/tickets/_active.md ← templates/docs/tickets/_active.md.tmpl
 - docs/STATE.md ← templates/docs/STATE.md.tmpl
 - docs/TEAM.md ← templates/docs/TEAM.md.tmpl (team mode only — fill lead info)
@@ -286,7 +290,7 @@ Print a formatted summary (see Important rules section for format). Include: eve
 6. Hook type is automatic. Detect OS and jq. The user does not choose. Report what was detected.
 7. Augment mode is silent. Skip existing files without asking. List them in the completion report.
 8. Use today's date (from the currentDate context injection) for all {{SETUP_DATE}} placeholders.
-9. Lite mode omits: TEAM.md, groom-ticket command, review-ticket command, claim-ticket command, deploy commands, Pending Lead Review section in _active.md. Replace review references in PLAYBOOK.md with "(solo — no review step)". Lite mode does NOT omit build-ticket or grilling — solo developers need the build phase and the design grill more than teams do, because nobody else is going to catch a bad design.
+9. Lite mode omits: TEAM.md, groom-ticket command, review-ticket command, claim-ticket command, deploy commands, Pending Lead Review section in _active.md. Replace review references in PLAYBOOK.md with "(solo — no review step)". Lite mode does NOT omit build-ticket, fix-bug, or grilling — solo developers need the build phase, the bug discipline, and the design grill more than teams do, because nobody else is going to catch a bad design or a symptom-level patch.
 10. Do not paraphrase a skill into the commands. The commands *invoke* skills by name (`superpowers:test-driven-development`, `ponytail:ponytail-review`, `grilling`) and then constrain their output (e.g. "write the design into the ticket, not docs/superpowers/specs/"). Rewriting a skill's content inline means it goes stale the moment upstream changes.
 11. Verify settings.json parses (`jq . .claude/settings.json`) before reporting success. It is the one generated file that can be syntactically broken.
 12. Hook JSON contract (both bash and node): blocking = {"block":true,"message":"..."} to stderr + exit 2; advisory = {"feedback":"..."} to stdout + exit 0. Bash hooks read $CLAUDE_TOOL_INPUT (PreToolUse/PostToolUse) or stdin via cat (Stop event). Node hooks use process.env.CLAUDE_TOOL_INPUT and process.stdin respectively.

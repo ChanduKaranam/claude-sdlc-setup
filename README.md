@@ -29,6 +29,7 @@ The generated pipeline doesn't improvise a process. Every phase runs a real meth
 | Plan | *(no new command — the design command doesn't exit until the plan exists)* | `superpowers:writing-plans` → the ticket's `## Implementation Plan` |
 | Review | `/review-ticket` | `grilling` + `ponytail:ponytail-review` on the plan, before a line of code exists |
 | **Build** | **`/build-ticket`** | `superpowers:test-driven-development` per task — no production code without a failing test first. `systematic-debugging` when something breaks. Code review after each task. |
+| Fix | `/fix-bug` | `grilling` the report, `systematic-debugging` to root cause, then a **hard stop** — you confirm the diagnosis and its blast radius before a line is written. Then failing-test-first, fixed at the root. |
 | Ship | `/complete-feature` | `superpowers:verification-before-completion` — no claim without the command output that proves it, in the message that claims it |
 
 ---

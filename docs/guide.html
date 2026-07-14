@@ -898,10 +898,99 @@ irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/insta
     </div>
   </section>
 
+  <!-- ================= FIX BUG ================= -->
+  <section id="fix">
+    <div class="sec-head">
+      <div class="eyebrow">Part four</div>
+      <h2>When something shipped is broken</h2>
+      <p class="muted">Bugs don't re-enter at the top of the pipeline — a two-line fix shouldn't drag a UI walkthrough behind it. <code>/fix-bug</code> is the loop back into shipped code, and it holds the same line the build phase does.</p>
+    </div>
+
+    <div class="cmd" style="margin-bottom:28px">/fix-bug <span class="arg">{slug}</span></div>
+
+    <p class="lede" style="margin-bottom:36px">A bug report names a <em>symptom</em>. It does not name a cause, and it does not name a fix — even when it sounds like it does, and even when you wrote it.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div class="step-body">
+          <h3>It grills the report</h3>
+          <p class="muted">One question at a time: what you expected, what happened instead, the exact steps, every time or only sometimes, the error text verbatim. It looks up whatever it can find for itself — the parent ticket, when the code last worked, whether any test covers that path — and only asks you the things it genuinely cannot know.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">02</div>
+        <div class="step-body">
+          <h3>It reproduces it before theorising</h3>
+          <p class="muted">Consistently, on the fix branch, before a single hypothesis. <b>If it cannot reproduce the bug, it stops and tells you</b> — it does not ship a plausible fix for something nobody has observed. A fix for a bug you never saw is a guess wearing a commit message.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">03</div>
+        <div class="step-body">
+          <h3>It traces the root cause — then stops</h3>
+          <p class="muted">It works backward from the symptom to the first place the data is actually wrong. Everything downstream of that point is symptom, including the line the error was thrown on. One hypothesis at a time; fixes are never stacked.</p>
+          <p class="muted">Then it stops and hands you a diagnosis, with the evidence that proves it and — the part that matters — the <b>blast radius</b>:</p>
+<pre>BUG-014 — DIAGNOSIS
+
+Root cause:   src/lib/parseRange.ts:41 — parseRange()
+Why:          empty filter yields [NaN, NaN], not [0, 0]. Traced, not guessed.
+Evidence:     {the instrumented output}
+
+Blast radius — every caller of parseRange():
+  <span class="k">routes/search.ts:88    also broken · covered by this fix</span>
+  <span class="k">routes/export.ts:23    also broken · NOT in the report</span>
+  jobs/digest.ts:12      not broken · guards upstream
+
+  <span class="k">Patching only the reported path would leave /export broken.</span>
+
+<span class="c">Confirm this diagnosis before I write the fix.</span></pre>
+          <p class="muted">Nothing gets written until you confirm it. That's the whole point of the step: a bug report names one broken path, and the root cause usually breaks several. The callers nobody reported are the ones that bite in three weeks.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">04</div>
+        <div class="step-body">
+          <h3>The failing test comes before the fix</h3>
+          <p class="muted">It must reproduce the reported symptom, fail against the <em>unfixed</em> code, and fail for the right reason — not because of a typo in the test. If it passes against the unfixed code, the bug was never reproduced, and it goes back to step 02.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">05</div>
+        <div class="step-body">
+          <h3>It fixes the cause, once</h3>
+          <p class="muted">At the root, where the callers route through — not once per caller. The lazy fix and the correct fix are the same fix here: one guard in the shared function is a smaller diff <em>and</em> the one that repairs the siblings. It won't refactor while it's in there, won't add a dependency, and won't harden adjacent code you didn't ask about.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">06</div>
+        <div class="step-body">
+          <h3>It proves the red-green</h3>
+          <p class="muted">Reverts the fix, watches the test go red, restores it, watches it go green — and pastes both. A regression test you have never watched fail is not testing anything; it will quietly stop covering the bug the first time someone refactors past it.</p>
+          <p class="muted">Then <code>/complete-feature</code> ships it through the same gates a feature gets. A one-line fix that skips the gates is exactly how the next bug gets in.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="law" style="margin-top:44px">
+      <div class="law-x">⨯ BLOCKED</div>
+      <div class="law-text">
+        <strong>No fix before the diagnosis is confirmed</strong>
+        <p>Not a test, not a stub, not "just trying something". There are no small bugs that earn an exemption — <em>"it's a one-liner"</em> is the sentence people say right before they patch the wrong line. And three failed fixes means stop, not fix number four: at three, the design is wrong, and more poking at the code will not reveal that.</p>
+        <div class="who">/fix-bug · systematic-debugging</div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= FIRST FEATURE ================= -->
   <section id="first">
     <div class="sec-head">
-      <div class="eyebrow">Part four</div>
+      <div class="eyebrow">Part five</div>
       <h2>Your first feature, end to end</h2>
       <p class="muted">What you actually type, and what happens between the lines. Solo track shown; a team inserts grooming, lead review and a claim before the build.</p>
     </div>
@@ -929,7 +1018,15 @@ irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/insta
 <span class="c">── ship ────────────────────────────────────────────────</span>
 /complete-feature saved-searches
    <span class="c">↳ every gate produces its own evidence.</span>
-   <span class="c">  two reviews on the diff. shortcuts surfaced. PR opened.</span></pre>
+   <span class="c">  two reviews on the diff. shortcuts surfaced. PR opened.</span>
+
+<span class="c">── later, something's broken ───────────────────────────</span>
+/fix-bug saved-searches-empty-filter
+   <span class="c">↳ grills the report. reproduces it. traces the cause.</span>
+   <span class="c">  then STOPS — you confirm the diagnosis and its blast</span>
+   <span class="c">  radius before a line is written.</span>
+   <span class="c">  then: failing test → fix at the root → prove red-green.</span>
+   <span class="c">  then /complete-feature, same gates as a feature.</span></pre>
 
     <div class="prose-stack" style="margin-top:36px">
       <p><b>The one thing people get wrong:</b> treating the plan as a formality and moving on. <code>/build-ticket</code> executes those tasks literally — the file paths, the signatures, the order. Fifteen minutes spent reading the plan when grooming ends is the highest-leverage time in the whole cycle. If the plan is wrong, go back and fix the plan. Do not fix it inline and build from your own version.</p>
@@ -939,7 +1036,7 @@ irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/insta
   <!-- ================= IRON LAWS ================= -->
   <section id="laws">
     <div class="sec-head">
-      <div class="eyebrow">Part five</div>
+      <div class="eyebrow">Part six</div>
       <h2>The four things it won't let you do</h2>
       <p class="muted">These aren't style guidance. They're the gates — the commands stop rather than proceed past them.</p>
     </div>
@@ -986,7 +1083,7 @@ irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/insta
   <!-- ================= LADDER ================= -->
   <section id="ladder">
     <div class="sec-head">
-      <div class="eyebrow">Part six</div>
+      <div class="eyebrow">Part seven</div>
       <h2>The ladder, before every diff</h2>
       <p class="muted">Ponytail runs across the whole pipeline. Before writing anything, it climbs — and stops at the first rung that holds.</p>
     </div>
