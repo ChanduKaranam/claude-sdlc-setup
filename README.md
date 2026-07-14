@@ -30,6 +30,7 @@ The generated pipeline doesn't improvise a process. Every phase runs a real meth
 | Review | `/review-ticket` | `grilling` + `ponytail:ponytail-review` on the plan, before a line of code exists |
 | **Build** | **`/build-ticket`** | `superpowers:test-driven-development` per task — no production code without a failing test first. `systematic-debugging` when something breaks. Code review after each task. |
 | Fix | `/fix-bug` | `grilling` the report, `systematic-debugging` to root cause, then a **hard stop** — you confirm the diagnosis and its blast radius before a line is written. Then failing-test-first, fixed at the root. |
+| Restyle | `/ui-fix` | For visual changes only — no ticket, no plan, no test. `frontend-design` + `ui-rules` for the design, ponytail for the diff, and the `design-review` agent for the proof (screenshots at 1440 and 390). Greps every render site first: a shared atom is not a local change. |
 | Ship | `/complete-feature` | `superpowers:verification-before-completion` — no claim without the command output that proves it, in the message that claims it |
 
 ---
@@ -41,6 +42,7 @@ The generated commands invoke two Claude Code plugins:
 | Plugin | Provides |
 |--------|----------|
 | [`superpowers`](https://github.com/obra/superpowers) | brainstorming, writing-plans, TDD, systematic-debugging, verification-before-completion, code review, worktrees |
+| `frontend-design` | the visual design pass used by `/ui-fix` |
 | [`ponytail`](https://github.com/DietrichGebert/ponytail) | the YAGNI ladder, `ponytail-review`, `ponytail-debt` |
 
 **You don't need to install these yourself.** The `.claude/settings.json` that `/setup` writes declares both, so Claude Code offers to install them the next time anyone opens the repo — including your teammates. (`grilling` is vendored directly into the project as a skill, so it needs nothing.)
@@ -50,6 +52,7 @@ If you'd rather have them globally, in Claude Code:
 ```
 /plugin marketplace add anthropics/claude-plugins-official
 /plugin install superpowers@claude-plugins-official
+/plugin install frontend-design@claude-plugins-official
 /plugin marketplace add DietrichGebert/ponytail
 /plugin install ponytail@ponytail
 ```

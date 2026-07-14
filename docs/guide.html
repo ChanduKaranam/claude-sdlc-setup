@@ -902,8 +902,8 @@ irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/insta
   <section id="fix">
     <div class="sec-head">
       <div class="eyebrow">Part four</div>
-      <h2>When something shipped is broken</h2>
-      <p class="muted">Bugs don't re-enter at the top of the pipeline — a two-line fix shouldn't drag a UI walkthrough behind it. <code>/fix-bug</code> is the loop back into shipped code, and it holds the same line the build phase does.</p>
+      <h2>When something is already shipped</h2>
+      <p class="muted">Neither bugs nor restyles re-enter at the top of the pipeline — a two-line change shouldn't drag a UI walkthrough behind it. These are the two loops back into shipped code. They skip the ceremony; they do not skip the evidence.</p>
     </div>
 
     <div class="cmd" style="margin-bottom:28px">/fix-bug <span class="arg">{slug}</span></div>
@@ -985,6 +985,38 @@ Blast radius — every caller of parseRange():
         <div class="who">/fix-bug · systematic-debugging</div>
       </div>
     </div>
+
+    <hr style="border:0;border-top:1px solid var(--hairline);margin:64px 0 56px">
+
+    <h2 style="margin-bottom:16px">When it's only how it looks</h2>
+    <p class="muted" style="margin-bottom:28px">Running a padding change through an architectural interview is how a team learns to route around its own process. So <code>/ui-fix</code> doesn't have one.</p>
+
+    <div class="cmd" style="margin-bottom:24px">/ui-fix <span class="arg">{slug}</span> <span class="tag">No ticket · no plan · no test</span></div>
+
+    <p style="margin-bottom:32px">Spacing, color, type, copy, a state that renders wrong. It skips the ceremony — and keeps the three things that actually stop UI work going sideways.</p>
+
+    <div class="cols">
+      <div class="card">
+        <h3>1 · The scope gate</h3>
+        <p class="muted">A UI fix changes how something <em>looks</em>. The moment it changes how something <em>works</em>, it isn't one — and the command stops and routes you.</p>
+        <p class="muted">Data fetching, a props contract, a new route, permissions: those go to <code>/new-feature</code>. Something looks wrong and nobody knows why: that's <code>/fix-bug</code>, because restyling around an unknown cause hides it rather than fixing it.</p>
+      </div>
+      <div class="card">
+        <h3>2 · The blast radius</h3>
+        <p class="muted">It greps every render site <em>before</em> editing anything.</p>
+        <p class="muted">"Make the button bigger" is a one-line change if that button is local, and a twelve-screen change if you edit the shared atom. Only you know which one you meant — so it tells you what it found, and asks when they differ.</p>
+      </div>
+      <div class="card">
+        <h3>3 · Looking at it</h3>
+        <p class="muted">There is no unit test for "the spacing looks right". The proof is that it rendered the screen and looked.</p>
+        <p class="muted">Screenshots at 1440 and 390, every state of any data view it touched, keyboard focus still visible. A UI change verified by reading the diff is not verified — the code already looked right to you, which is precisely why the bug is still there.</p>
+      </div>
+      <div class="card">
+        <h3>And the ladder, as always</h3>
+        <p class="muted">CSS before JavaScript. A token before a hardcoded hex. The call site before the shared component. An existing variant before a new one.</p>
+        <p class="muted">Never lazy about visible focus, contrast, hit-target size, reduced motion, or the five states. That's accessibility, not polish — first dropped, last noticed.</p>
+      </div>
+    </div>
   </section>
 
   <!-- ================= FIRST FEATURE ================= -->
@@ -1026,7 +1058,14 @@ Blast radius — every caller of parseRange():
    <span class="c">  then STOPS — you confirm the diagnosis and its blast</span>
    <span class="c">  radius before a line is written.</span>
    <span class="c">  then: failing test → fix at the root → prove red-green.</span>
-   <span class="c">  then /complete-feature, same gates as a feature.</span></pre>
+   <span class="c">  then /complete-feature, same gates as a feature.</span>
+
+<span class="c">── just the padding is off ─────────────────────────────</span>
+/ui-fix results-table-density
+   <span class="c">↳ finds the file. greps who else renders it.</span>
+   <span class="c">  designs it against DESIGN.md. smallest diff.</span>
+   <span class="c">  screenshots 1440 + 390, checks all five states.</span>
+   <span class="c">  no ticket. no plan. no test. just look at it.</span></pre>
 
     <div class="prose-stack" style="margin-top:36px">
       <p><b>The one thing people get wrong:</b> treating the plan as a formality and moving on. <code>/build-ticket</code> executes those tasks literally — the file paths, the signatures, the order. Fifteen minutes spent reading the plan when grooming ends is the highest-leverage time in the whole cycle. If the plan is wrong, go back and fix the plan. Do not fix it inline and build from your own version.</p>

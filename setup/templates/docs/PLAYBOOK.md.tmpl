@@ -23,6 +23,7 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 | `/claim-ticket {id}` | Pick up an approved ticket | Type in Claude |
 | `/build-ticket {slug}` | **Write the code.** Executes the ticket's Implementation Plan under TDD | Type in Claude |
 | `/fix-bug {slug}` | Something shipped is broken. Reproduce → root cause → your confirmation → test-first fix | Type in Claude |
+| `/ui-fix {slug}` | A visual change to an existing screen. No ticket, no plan — but it greps who else uses the component, and it looks at the result | Type in Claude |
 | `/complete-feature {slug}` | Pre-merge gate + PR | Type in Claude |
 | `/handoff` | Save state and pause | Type in Claude |
 | `/resume-session` | Restore context and continue | Type in Claude |
@@ -60,6 +61,16 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 5. **It proves the red-green**: reverts the fix, watches the test fail, restores it. A regression test you have never seen fail is not testing anything.
 
 Then `/complete-feature` ships it through the same gates a feature gets. A one-line fix that skips the gates is how the next bug gets in.
+
+## 4c. When it's just a UI change
+
+`/ui-fix {slug}`. Spacing, color, type, copy, a state that looks wrong. **No ticket, no plan, no failing test** — running a padding change through an architectural interview is how a team learns to route around its own process.
+
+What it does not skip:
+
+- **The scope gate.** Visual changes proceed. The moment it touches what data is fetched, a props contract, a route, or permissions, it stops and routes you to `/new-feature` or `/fix-bug`. If a change is visually wrong and nobody knows *why*, that's a bug with a visual symptom — restyling around it hides the cause.
+- **The blast radius.** It greps every render site before editing. "Make the button bigger" is a one-line change if the button is local and a twelve-screen change if you edit the shared atom — and only you know which one you meant. It tells you which it found, and asks when they differ.
+- **Looking at it.** Screenshots at 1440px and 390px, every state of any data view it touched, keyboard focus still visible. A UI change verified by reading the diff is not verified — the code looked right to you already, which is exactly why the bug is still there.
 
 ## 5. Commit message format
 

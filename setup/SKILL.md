@@ -20,6 +20,7 @@ The generated pipeline is not a set of freehand instructions. Every phase runs a
 | Design review | `/review-ticket` (team) | `grilling` + `ponytail:ponytail-review` on the plan |
 | Build | `/build-ticket` | `superpowers:subagent-driven-development` or `executing-plans`, `test-driven-development` per task, `systematic-debugging` on failure, `requesting-code-review` + `receiving-code-review` per task |
 | Fix | `/fix-bug` | `grilling` on the report, `systematic-debugging` to root cause, **a hard stop for human confirmation of the diagnosis**, then `test-driven-development` (failing reproduction test first) and `verification-before-completion` (red-green proven) |
+| Restyle | `/ui-fix` (frontend only) | A scope gate (visual → proceed; behavioral → route it), a blast-radius grep (who else renders this component), `frontend-design:frontend-design` + `ui-rules` for the design, ponytail for the diff, and the `design-review` agent for the proof — screenshots at 1440 and 390. No ticket, no plan, no TDD. |
 | Ship | `/complete-feature` | `superpowers:verification-before-completion`, both review lenses, `ponytail:ponytail-debt`, `finishing-a-development-branch` |
 
 ## When to invoke
@@ -208,7 +209,9 @@ Read from ~/.claude/skills/setup/templates/hooks/bash/ or .../node/ based on OS 
 LAYER 2 — .claude/settings.json
 Read ~/.claude/skills/setup/templates/settings.json.tmpl. Fill all hook command references (bash vs node path) and the permissions allow/deny arrays from Batch 4 answers.
 
-Its `extraKnownMarketplaces` and `enabledPlugins` keys are already filled in — do not touch them. They declare the `superpowers` and `ponytail` plugins that the generated commands invoke, and they are what makes this scaffold portable: a teammate cloning the repo gets both offered on their first session.
+Its `extraKnownMarketplaces` and `enabledPlugins` keys are already filled in — do not touch them. They declare the three plugins the generated commands invoke (`superpowers`, `frontend-design`, `ponytail`), and they are what makes this scaffold portable: a teammate cloning the repo gets all three offered on their first session.
+
+`frontend-design` is declared even on backend-only projects. It is one line, it costs nothing when nothing invokes it, and conditionalising it would mean another comma-sensitive placeholder in a template that is already one bad comma away from unparseable JSON. The `/ui-fix` command that uses it is still gated on frontend detection.
 
 Watch the commas. The `{{EXTRA_ALLOW}}` token sits mid-array and its value must end with a trailing comma (or be empty); `{{EXTRA_DENY}}`, `{{MOCKUP_HOOK}}`, `{{SCHEMA_REMINDER_HOOK}}` and `{{TOKEN_LEDGER_HOOK}}` each follow a complete entry and must begin with a leading comma (or be empty). The template is not valid JSON until it is rendered. **After writing it, verify: `jq . .claude/settings.json`.** If that fails, the scaffold is broken on session one.
 
@@ -236,8 +239,10 @@ LAYER 6 — .claude/commands/
 Read from ~/.claude/skills/setup/templates/commands/full/ (team) or .../lite/ (solo).
 Fill all {{PLACEHOLDER}} tokens. Write to .claude/commands/{name}.md.
 
-Full (11): new-feature, groom-ticket, review-ticket, claim-ticket, **build-ticket**, **fix-bug**, complete-feature, handoff, resume-session, dev-deploy, prod-deploy.
-Lite (7): new-feature, work-ticket, **build-ticket**, **fix-bug**, complete-feature, handoff, resume-session.
+Full (12): new-feature, groom-ticket, review-ticket, claim-ticket, **build-ticket**, **fix-bug**, **ui-fix**, complete-feature, handoff, resume-session, dev-deploy, prod-deploy.
+Lite (8): new-feature, work-ticket, **build-ticket**, **fix-bug**, **ui-fix**, complete-feature, handoff, resume-session.
+
+**`ui-fix` is only generated when a frontend surface was detected.** It depends on `docs/DESIGN.md`, the `ui-rules` and `component-patterns` skills, and the `design-review` agent — on a backend-only project it has no consumer, so do not emit it. (Ponytail rung 1, applied to the scaffold itself.)
 
 `build-ticket` is where code gets written. Without it the pipeline designs a feature and then stops at the edge of implementing it.
 
