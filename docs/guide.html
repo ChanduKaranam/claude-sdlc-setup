@@ -531,6 +531,43 @@
 
   .prose-stack { display: flex; flex-direction: column; gap: 22px; }
 
+  /* ---------- tables (role × command, status × owner) ---------- */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--hairline); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    font-size: 14.5px;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--steel);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.cmd-cell {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .yes { color: var(--verify); font-family: var(--mono); font-weight: 700; }
+  .no  { color: var(--signal); font-family: var(--mono); font-weight: 700; }
+  .role-note { color: var(--steel); font-size: 13.5px; }
+
   footer {
     border-top: 1px solid var(--hairline);
     padding: 40px 0;
@@ -1019,10 +1056,182 @@ Blast radius — every caller of parseRange():
     </div>
   </section>
 
+  <!-- ================= TEAM ================= -->
+  <section id="team">
+    <div class="sec-head">
+      <div class="eyebrow">Part five</div>
+      <h2>Working as a team</h2>
+      <p class="muted">Only if you chose team mode at setup. Solo skips all of this — no roster, no review gates, no approval queue.</p>
+    </div>
+
+    <div class="prose-stack" style="margin-bottom:44px">
+      <p class="lede">One file decides everything: <code>docs/TEAM.md</code>. It is the source of truth for who can approve work and who can pick it up, and Claude reads it on your machine, before anything is pushed.</p>
+      <p>Identity is <b>your git email</b>. Claude runs <code>git config user.email</code> and looks it up in the roster. If your email isn't in either list, the ticket commands refuse to run — not as a warning, they stop.</p>
+    </div>
+
+<pre>docs/TEAM.md
+<span class="c">──────────────────────────────────────────────</span>
+---
+<span class="k">leads:</span>
+  - name: Ada Lovelace
+    github: adalovelace
+    <span class="k">email: ada@example.com</span>      <span class="c"># ← matched against `git config user.email`</span>
+<span class="k">devs:</span>
+  - name: Alan Turing
+    github: aturing
+    <span class="k">email: alan@example.com</span>
+---</pre>
+
+    <h3 style="margin:52px 0 20px">Who can do what</h3>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Lead</th>
+            <th>Dev</th>
+            <th>The difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cmd-cell">/new-feature</td>
+            <td class="yes">yes</td>
+            <td class="yes">yes</td>
+            <td class="role-note">A lead's ticket is born <code>APPROVED</code>. A dev's is born <code>TODO</code> and has to earn its way through review.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/groom-ticket</td>
+            <td class="yes">yes</td>
+            <td class="yes">yes</td>
+            <td class="role-note">A lead grooming a ticket approves it in the same motion — they're author and reviewer, and that's deliberate. A dev's grooming lands at <code>GROOMED</code>, waiting.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/review-ticket</td>
+            <td class="yes">yes</td>
+            <td class="no">no</td>
+            <td class="role-note">Leads only, and there is no bypass. This is the approval gate.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/claim-ticket</td>
+            <td class="yes">yes</td>
+            <td class="yes">yes</td>
+            <td class="role-note">Anyone on the roster — but only on an <code>APPROVED</code> ticket. Claiming an unapproved one is refused.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/build-ticket</td>
+            <td class="yes">yes</td>
+            <td class="yes">yes</td>
+            <td class="role-note">Same rules for everyone. The plan is the plan.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/fix-bug · /ui-fix</td>
+            <td class="yes">yes</td>
+            <td class="yes">yes</td>
+            <td class="role-note">No approval gate — but the diagnosis stop and the blast-radius check still apply.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:16px">Not on the roster at all? Every one of those refuses to run. That's the intended behavior, and it's the first thing to check when a command won't start.</p>
+
+    <h3 style="margin:56px 0 20px">A ticket's journey, and who moves it</h3>
+
+<pre><span class="c">── the same ticket, depending on who wrote it ──────────────────────</span>
+
+  <span class="c">A DEV WRITES IT                      A LEAD WRITES IT</span>
+
+  /new-feature      → <span class="k">TODO</span>             /new-feature   → <span class="g">APPROVED</span>
+  /groom-ticket     → <span class="k">GROOMED</span>          /groom-ticket  → <span class="g">APPROVED</span>
+                                            <span class="c">(they design it and approve</span>
+  <span class="k">/review-ticket  ← LEADS ONLY</span>               <span class="c">it in one motion — author</span>
+       ├─ approve   → <span class="g">APPROVED</span>              <span class="c">and reviewer, deliberately)</span>
+       └─ push back → <span class="k">CHANGES_REQUESTED</span>
+                         │
+                         └─► back to /groom-ticket, with numbered feedback
+
+<span class="c">── from APPROVED on, it's the same for everyone ────────────────────</span>
+
+  /claim-ticket     → <span class="g">IN_PROGRESS</span>      <span class="c">anyone on the roster</span>
+  /build-ticket                          <span class="c">test-first, reviewed per task</span>
+  /complete-feature → <span class="g">READY_FOR_REVIEW</span> <span class="c">→ PR</span></pre>
+
+    <p class="muted" style="margin-top:20px">Devs who get <code>CHANGES_REQUESTED</code> don't argue with it in chat — <code>/groom-ticket</code> walks the lead's numbered feedback item by item, verifies each against the actual code, and pushes back with reasoning where the lead is wrong. Being reviewed is a skill the pipeline takes as seriously as reviewing.</p>
+
+    <h3 style="margin:56px 0 24px">Joining a project as a developer</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">JOIN 01</div>
+        <div class="step-body">
+          <h3>Clone it, and let the plugins load</h3>
+          <p class="muted">The repo's <code>.claude/settings.json</code> already declares superpowers, frontend-design and ponytail. Open the project in Claude Code and it offers to install them. Accept, and restart. Until they load, the commands can't call what they depend on.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">JOIN 02</div>
+        <div class="step-body">
+          <h3>Get on the roster</h3>
+          <p class="muted">A lead adds you to <code>devs:</code> in <code>docs/TEAM.md</code> — or you add yourself and open a PR for a lead to merge. It's a normal branch and a normal PR; it takes effect the moment it merges.</p>
+          <p class="muted">Then check the thing that actually bites:</p>
+<pre>git config user.email     <span class="c"># must match the roster EXACTLY</span></pre>
+          <p class="muted">A typo, a work address in the roster and a personal one in git, a fresh laptop where you never set it — any of those and every ticket command refuses to start. It looks like the tooling is broken. It isn't; it doesn't know who you are.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">JOIN 03</div>
+        <div class="step-body">
+          <h3>Read yourself in — three files, ten minutes</h3>
+          <p class="muted"><code>CLAUDE.md</code> for the rules the code has to follow. <code>docs/PLAYBOOK.md</code> for how the team works (Claude never loads that one — it's written for you). <code>docs/tickets/_active.md</code> for what's in flight and who has it.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">JOIN 04</div>
+        <div class="step-body">
+          <h3>Take a ticket</h3>
+          <p class="muted">Find one that's <code>APPROVED</code> in <code>_active.md</code>, then <code>/claim-ticket {id}</code> → <code>/build-ticket {slug}</code>. Someone else already designed it and a lead already approved it — the plan in the ticket is the contract, and your job is to execute it, not to redesign it. If the plan is wrong, say so and send it back to grooming.</p>
+          <p class="muted">Your first ticket is a good one to <em>not</em> be clever on.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols" style="margin-top:52px">
+      <div class="card">
+        <h3>Setting up as the lead</h3>
+        <p class="muted">Whoever runs <code>/setup</code> and picks team mode becomes the first lead, and the roster starts with just them. Add the rest of the team by editing <code>docs/TEAM.md</code> — leads in <code>leads:</code>, everyone else in <code>devs:</code>.</p>
+        <p class="muted">What you own that nobody else can: <code>/review-ticket</code>. It's the last gate before code exists, and it's grilled one question at a time. Approving a ticket with a vague plan means approving a vague feature — <code>/build-ticket</code> will reject it anyway, so catch it there.</p>
+        <p class="muted">Watch the <b>Pending Lead Review</b> table in <code>_active.md</code>. Every ticket sitting in it is a developer who cannot start.</p>
+      </div>
+
+      <div class="card">
+        <h3>Stepping up from dev to lead</h3>
+        <p class="muted">Move your entry from <code>devs:</code> to <code>leads:</code> in <code>docs/TEAM.md</code>, open a PR, get an existing lead to merge it. That's the whole promotion — it's a roster file in git, so it's reviewable and auditable like any other change.</p>
+        <p class="muted">You gain <code>/review-ticket</code>, and your own tickets stop needing someone else's approval. That second part is worth pausing on: nobody is checking your designs any more. Grill your own tickets the way you'd grill someone else's.</p>
+      </div>
+
+      <div class="card">
+        <h3>Two people, one ticket</h3>
+        <p class="muted"><code>_active.md</code> is the shared board — who claimed what, and when. Claiming writes you into it, so nobody picks up work that's already moving.</p>
+        <p class="muted">If you <code>/resume-session</code> on a ticket someone else claimed, it stops and asks before taking it over, then writes the takeover to <code>docs/sessions/_takeovers.log</code>. It will never silently steal a colleague's work.</p>
+      </div>
+
+      <div class="card">
+        <h3>Handing off mid-build</h3>
+        <p class="muted"><code>/handoff</code> runs the tests <em>before</em> writing down what's done, so what the next person reads is true rather than optimistic. A half-finished file is marked in progress; a red suite goes in the blockers list.</p>
+        <p class="muted">Whoever picks it up runs <code>/resume-session</code> — and if there were blockers, it debugs them first rather than routing around them. A handoff that overstates progress is worse than no handoff: the next dev builds on a floor that isn't there.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= FIRST FEATURE ================= -->
   <section id="first">
     <div class="sec-head">
-      <div class="eyebrow">Part five</div>
+      <div class="eyebrow">Part six</div>
       <h2>Your first feature, end to end</h2>
       <p class="muted">What you actually type, and what happens between the lines. Solo track shown; a team inserts grooming, lead review and a claim before the build.</p>
     </div>
@@ -1075,7 +1284,7 @@ Blast radius — every caller of parseRange():
   <!-- ================= IRON LAWS ================= -->
   <section id="laws">
     <div class="sec-head">
-      <div class="eyebrow">Part six</div>
+      <div class="eyebrow">Part seven</div>
       <h2>The four things it won't let you do</h2>
       <p class="muted">These aren't style guidance. They're the gates — the commands stop rather than proceed past them.</p>
     </div>
@@ -1122,7 +1331,7 @@ Blast radius — every caller of parseRange():
   <!-- ================= LADDER ================= -->
   <section id="ladder">
     <div class="sec-head">
-      <div class="eyebrow">Part seven</div>
+      <div class="eyebrow">Part eight</div>
       <h2>The ladder, before every diff</h2>
       <p class="muted">Ponytail runs across the whole pipeline. Before writing anything, it climbs — and stops at the first rung that holds.</p>
     </div>

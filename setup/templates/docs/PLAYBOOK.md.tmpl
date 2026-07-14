@@ -72,6 +72,20 @@ What it does not skip:
 - **The blast radius.** It greps every render site before editing. "Make the button bigger" is a one-line change if the button is local and a twelve-screen change if you edit the shared atom — and only you know which one you meant. It tells you which it found, and asks when they differ.
 - **Looking at it.** Screenshots at 1440px and 390px, every state of any data view it touched, keyboard focus still visible. A UI change verified by reading the diff is not verified — the code looked right to you already, which is exactly why the bug is still there.
 
+## 4d. Joining the project
+
+Identity is your **git email**. Claude runs `git config user.email` and looks it up in `docs/TEAM.md`. If it isn't in `leads:` or `devs:`, every ticket command refuses to run — it looks like the tooling is broken, but it isn't; it doesn't know who you are.
+
+1. **Clone, and let the plugins load.** `.claude/settings.json` declares them; Claude Code offers to install on your first session here. Accept, restart.
+2. **Get on the roster.** A lead adds you to `devs:` in `docs/TEAM.md`, or you add yourself and open a PR. Effective on merge.
+3. **Check your email matches the roster exactly** — `git config user.email`. A work address in one and a personal one in the other is the most common way this fails.
+4. **Read three files:** `CLAUDE.md` (the rules the code follows), this playbook (how the team works), `docs/tickets/_active.md` (what's in flight, and who has it).
+5. **Take an APPROVED ticket:** `/claim-ticket {id}` → `/build-ticket {slug}`. Someone designed it and a lead approved it — the plan in the ticket is the contract. If it's wrong, say so and send it back to grooming rather than quietly building something else.
+
+**Lead vs dev.** A lead can run `/review-ticket` and nobody else can; a lead's own tickets are auto-approved. A dev's ticket travels `TODO` → `/groom-ticket` → `GROOMED` → a lead's `/review-ticket` → `APPROVED` before it can be claimed. From `APPROVED` on, the pipeline is identical for both.
+
+**Stepping up to lead:** move your entry from `devs:` to `leads:` in `docs/TEAM.md`, open a PR, have an existing lead merge it. You gain `/review-ticket` — and lose the safety net of someone else checking your designs, so grill your own tickets the way you'd grill theirs.
+
 ## 5. Commit message format
 
 ```
