@@ -26,7 +26,7 @@ The generated pipeline doesn't improvise a process. Every phase runs a real meth
 |-------|---------|--------------|
 | Scope | `/new-feature` | ponytail's first rung — does this feature need to exist at all? |
 | Design | `/groom-ticket` · `/work-ticket` | `superpowers:brainstorming`, then `grilling` for the risk round — one question at a time |
-| Plan | same command | `superpowers:writing-plans` → the ticket's `## Implementation Plan` |
+| Plan | *(no new command — the design command doesn't exit until the plan exists)* | `superpowers:writing-plans` → the ticket's `## Implementation Plan` |
 | Review | `/review-ticket` | `grilling` + `ponytail:ponytail-review` on the plan, before a line of code exists |
 | **Build** | **`/build-ticket`** | `superpowers:test-driven-development` per task — no production code without a failing test first. `systematic-debugging` when something breaks. Code review after each task. |
 | Ship | `/complete-feature` | `superpowers:verification-before-completion` — no claim without the command output that proves it, in the message that claims it |

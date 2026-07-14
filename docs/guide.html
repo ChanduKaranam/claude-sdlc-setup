@@ -211,6 +211,8 @@
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
+  /* Plan has no command of its own — it's the tail of the design command. */
+  .phase-cmd.cont { color: var(--steel); font-weight: 400; }
   .phase-out {
     font-size: 13.5px;
     line-height: 1.45;
@@ -627,8 +629,8 @@
 
       <div class="phase">
         <div class="phase-n">03 <span>Plan</span></div>
-        <div class="phase-cmd">…same command</div>
-        <div class="phase-out">Leaves an <b>Implementation Plan</b> — one task per test cycle, exact paths, exact signatures.</div>
+        <div class="phase-cmd cont">↳ nothing new to type</div>
+        <div class="phase-out">Same command as 02 — it doesn't exit until the plan exists. Leaves an <b>Implementation Plan</b>: one task per test cycle, exact paths, exact signatures.</div>
         <div class="phase-gate">No TBDs. Build refuses a vague plan.</div>
       </div>
 
