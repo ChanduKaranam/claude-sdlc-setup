@@ -1228,10 +1228,197 @@ Blast radius — every caller of parseRange():
     </div>
   </section>
 
+  <!-- ================= TICKETS ================= -->
+  <section id="tickets">
+    <div class="sec-head">
+      <div class="eyebrow">Part six</div>
+      <h2>The ticketing system</h2>
+      <p class="muted">No Jira, no board, no API. A ticket is a markdown file in your repo, and it travels through git like everything else — reviewable in a PR, blamed, reverted, branched.</p>
+    </div>
+
+    <div class="prose-stack" style="margin-bottom:44px">
+      <p class="lede">The ticket is not a description of the work. It <em>is</em> the work: the design, the API contracts, the test plan, and a numbered implementation plan that <code>/build-ticket</code> executes literally.</p>
+      <p>That's why a vague ticket becomes a vague feature, and why the commands refuse to move a ticket forward until the section they depend on actually exists.</p>
+    </div>
+
+    <h3 style="margin-bottom:20px">Where it all lives</h3>
+
+    <div class="tree">
+<span class="d">docs/</span>
+  <span class="d">tickets/</span>
+    <span class="d">TICKET-014-saved-searches.md</span>   <span class="n">one feature. design + plan + evidence.</span>
+    <span class="d">BUG-003-empty-filter-crash.md</span>    <span class="n">one bug. symptom + cause + regression test.</span>
+    <span class="d">_active.md</span>                        <span class="n">the shared board — who has what, right now</span>
+    <span class="d">_TEMPLATE.md</span>                      <span class="n">copied by /new-feature</span>
+    <span class="d">_BUG_TEMPLATE.md</span>                  <span class="n">copied by /fix-bug</span>
+  <span class="d">STATE.md</span>                            <span class="n">where this session left off</span>
+  <span class="d">decisions/</span>                          <span class="n">ADRs — the "why", for the choices worth keeping</span>
+  <span class="d">sessions/</span>                           <span class="n">snapshots, change log, takeovers, token ledger</span></div>
+
+    <p class="muted" style="margin-top:20px">Numbering is just the next one up: <code>TICKET-013</code> was the last, so yours is <code>TICKET-014</code>. Bugs count separately.</p>
+
+    <h3 style="margin:56px 0 20px">A ticket, section by section — and who writes each one</h3>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Section</th>
+            <th>Written by</th>
+            <th>What it holds</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cmd-cell">frontmatter</td>
+            <td class="role-note">everything</td>
+            <td class="role-note">The machine-readable part: <code>status</code>, who groomed / approved / claimed it and when, estimates. The commands read this to decide whether they're allowed to run.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Goal</td>
+            <td class="role-note">/new-feature</td>
+            <td class="role-note">One paragraph. Why this exists and what a user can do once it ships.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Acceptance Criteria</td>
+            <td class="role-note">/new-feature</td>
+            <td class="role-note">What "done" means, in checkable statements. <code>/complete-feature</code> reconciles against these.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">UI Walkthrough<br>Data Model<br>API Contracts<br>Test Scenarios<br>Test Plan<br>Risks &amp; Rollback</td>
+            <td class="role-note">/groom-ticket<br>(or /work-ticket, solo)</td>
+            <td class="role-note">The design. Every route and its five states; every table, column and migration; every endpoint's request and response shape; the exact test file paths, per layer. The risk round is grilled one question at a time.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Implementation Plan</td>
+            <td class="role-note">/groom-ticket<br>(via writing-plans)</td>
+            <td class="role-note"><b>The contract.</b> Global constraints copied verbatim, then one task per test cycle — exact files, exact signatures, and steps in strict test-first order. No TBDs: <code>/build-ticket</code> refuses the ticket.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Lead Feedback</td>
+            <td class="role-note">/review-ticket</td>
+            <td class="role-note">Numbered, specific change requests. Appended, never overwritten — every round of it stays in the file.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Change Log</td>
+            <td class="role-note">/build-ticket</td>
+            <td class="role-note">A row per task as it lands, with its commit.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Verification Log</td>
+            <td class="role-note">/build-ticket<br>/complete-feature</td>
+            <td class="role-note">The evidence. Every row is a command that was actually run, with its actual output. An unrun row is an empty row, not a ticked one.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Delays &amp; Blockers</td>
+            <td class="role-note">whoever is stuck</td>
+            <td class="role-note">Including the failed hypotheses when debugging stalls. At three failed fixes, this is where the history goes before it comes back to a human.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">Token Ledger</td>
+            <td class="role-note">a hook</td>
+            <td class="role-note">Written automatically when a session ends. What this feature actually cost, per session.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:56px 0 20px">What each command actually writes</h3>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>To the ticket</th>
+            <th>Elsewhere</th>
+            <th>Git</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cmd-cell">/new-feature</td>
+            <td class="role-note">Creates it from the template. Goal, surfaces, states, acceptance criteria, estimate. <code>status: TODO</code> — or <code>APPROVED</code> if a lead (or solo) wrote it.</td>
+            <td class="role-note">Adds it to <code>_active.md</code>. Sets <code>STATE.md</code> to scaffolded.</td>
+            <td class="role-note">Branches, commits. No push.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/groom-ticket</td>
+            <td class="role-note">All six design sections, plus the Implementation Plan. Records who groomed it and which round. → <code>GROOMED</code>, or <code>APPROVED</code> if a lead.</td>
+            <td class="role-note">A dev's ticket joins the <b>Pending Lead Review</b> queue in <code>_active.md</code>.</td>
+            <td class="role-note">Commits <b>and pushes</b> — so a lead on another machine can pull it.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/review-ticket</td>
+            <td class="role-note">→ <code>APPROVED</code>, or <code>CHANGES_REQUESTED</code> with numbered feedback appended.</td>
+            <td class="role-note">Clears it from the Pending Lead Review queue on approval.</td>
+            <td class="role-note">Commits and pushes.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/claim-ticket</td>
+            <td class="role-note">→ <code>IN_PROGRESS</code>, stamped with your name and the time. The body is untouched.</td>
+            <td class="role-note">You appear on the board in <code>_active.md</code>. <code>STATE.md</code> initialized.</td>
+            <td class="role-note">Isolated workspace on the feature branch. Commits.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/build-ticket</td>
+            <td class="role-note">Ticks the plan's checkboxes as each task lands. Adds Change Log rows. Fills the Verification Log at the done gate.</td>
+            <td class="role-note">Updates <code>STATE.md</code> after <em>every</em> task — so a handoff is never stale.</td>
+            <td class="role-note">A commit per task, each one reviewed before the next starts.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/handoff</td>
+            <td class="role-note">—</td>
+            <td class="role-note">Writes <code>STATE.md</code> — but runs the tests <em>first</em>, so what it records is true rather than optimistic.</td>
+            <td class="role-note">Commits and pushes, so anyone can pick it up.</td>
+          </tr>
+          <tr>
+            <td class="cmd-cell">/complete-feature</td>
+            <td class="role-note">→ <code>READY_FOR_REVIEW</code>. Verification Log completed with real command output.</td>
+            <td class="role-note">ADRs into <code>docs/decisions/</code>. Deliberate shortcuts harvested into the PR body.</td>
+            <td class="role-note">Pushes, opens the PR. Not if anything is red.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:16px">Hooks write the rest without being asked: a snapshot of every session, a running log of changed files, an audit line whenever someone takes over another dev's ticket, and the token ledger.</p>
+
+    <h3 style="margin:56px 0 20px">So what happens when you finish something?</h3>
+
+    <div class="cols">
+      <div class="card">
+        <h3>A feature</h3>
+        <p class="muted"><code>/complete-feature</code> runs the gates — tests, lint, types, every Test Plan file actually existing on disk, every plan task ticked. Each claim carries the output that proves it.</p>
+        <p class="muted">Two reviews run on the diff: one for correctness, one for what should simply be deleted. The ticket's Verification Log fills with what was observed, the ADRs get written, the shortcuts you left behind are surfaced in the PR body with their upgrade triggers.</p>
+        <p class="muted">Then the PR opens against the integration branch. The ticket goes <code>READY_FOR_REVIEW</code> and stays in the repo — the design, the plan, and the evidence, all in one file, next to the code it produced.</p>
+      </div>
+
+      <div class="card">
+        <h3>A bug</h3>
+        <p class="muted"><code>/fix-bug</code> writes a <code>BUG-XXX</code> ticket instead — a slim one. Symptom, reproduction, root cause, blast radius, the fix, the regression test.</p>
+        <p class="muted">It travels <code>REPORTED</code> → <code>DIAGNOSED</code> → <code>IN_PROGRESS</code> → <code>READY_FOR_REVIEW</code>, and the jump to <code>DIAGNOSED</code> is the one that needs a human: you confirm the root cause and its blast radius before any code exists.</p>
+        <p class="muted">Then it ships through <code>/complete-feature</code>, same gates as a feature. A one-line fix that skips them is how the next bug gets in.</p>
+      </div>
+
+      <div class="card">
+        <h3>A UI change</h3>
+        <p class="muted"><code>/ui-fix</code> writes <b>no ticket at all</b>, and that's deliberate. Running a padding change through a ticket, a design round and a plan is how a team learns to route around its own process.</p>
+        <p class="muted">The record is the commit and the PR, which carry what changed, where, the blast radius, and the screenshots. That's proportionate to a visual change — and it's why the scope gate matters so much: the moment it stops being visual, it needs a ticket again.</p>
+      </div>
+
+      <div class="card">
+        <h3>Why files, not a tracker</h3>
+        <p class="muted">The ticket lives on the branch that implements it. It gets reviewed in the same PR as the code, so a design change and a code change can't silently drift apart.</p>
+        <p class="muted">It's greppable, diffable, and revertable. Claude reads it without an API call or a token. And when someone asks in a year why the schema looks like that, the answer is in the repo, not in a tab someone closed.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= FIRST FEATURE ================= -->
   <section id="first">
     <div class="sec-head">
-      <div class="eyebrow">Part six</div>
+      <div class="eyebrow">Part seven</div>
       <h2>Your first feature, end to end</h2>
       <p class="muted">What you actually type, and what happens between the lines. Solo track shown; a team inserts grooming, lead review and a claim before the build.</p>
     </div>
@@ -1284,7 +1471,7 @@ Blast radius — every caller of parseRange():
   <!-- ================= IRON LAWS ================= -->
   <section id="laws">
     <div class="sec-head">
-      <div class="eyebrow">Part seven</div>
+      <div class="eyebrow">Part eight</div>
       <h2>The four things it won't let you do</h2>
       <p class="muted">These aren't style guidance. They're the gates — the commands stop rather than proceed past them.</p>
     </div>
@@ -1331,7 +1518,7 @@ Blast radius — every caller of parseRange():
   <!-- ================= LADDER ================= -->
   <section id="ladder">
     <div class="sec-head">
-      <div class="eyebrow">Part eight</div>
+      <div class="eyebrow">Part nine</div>
       <h2>The ladder, before every diff</h2>
       <p class="muted">Ponytail runs across the whole pipeline. Before writing anything, it climbs — and stops at the first rung that holds.</p>
     </div>
