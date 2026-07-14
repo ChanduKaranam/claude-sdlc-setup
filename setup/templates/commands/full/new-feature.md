@@ -49,6 +49,12 @@ Stay in Plan Mode for the entire interview. Files are written AFTER ExitPlanMode
 
 ## Step 5 — Architectural interview (3 rounds, ≤4 questions per AskUserQuestion batch)
 
+**Before Round 1, climb ponytail's first rung: does this feature need to exist at all?**
+
+Ask it plainly. Is there a rung above building it — an existing feature that covers the case, a config change, a native platform behavior, a thing the user could already do if they knew where to click? If the honest answer is "this is speculative", say so in one line and stop before you spend a ticket on it. YAGNI is cheapest at the very start.
+
+If it survives that, run the rounds. These are the fast, factual rounds — batched `AskUserQuestion` is right here. The deep design happens in `/groom-ticket`, and that one is grilled.
+
 ### Round 1 — Scope
 1. Who's the primary user and what are they doing?
 2. Which surfaces? ({{SURFACES}})
@@ -104,4 +110,5 @@ Print a formatted summary with ticket path, branch, estimate, and next step. Sto
 
 - Do not skip the interview. Tickets without state lists ship UI bugs.
 - Ask in batches of 4 max.
-- If the dev says "decide at build time", mark it TBD — Claude will ask via AskUserQuestion during the build.
+- If the dev says "decide later", that decision defers to `/groom-ticket`, which is the design command — not to build time. `/build-ticket` refuses a ticket whose Implementation Plan still contains TBDs, and it is right to: an unresolved decision does not get more resolved by having code written around it.
+- This command scaffolds a ticket. It does not design one and it does not build one.

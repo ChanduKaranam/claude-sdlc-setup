@@ -25,7 +25,9 @@ git switch -c feature/$ARGUMENTS {{BASE_BRANCH}}
 
 ## Step 4 — ENTER PLAN MODE: quick interview (≤4 questions per batch)
 
-Ask:
+**First, ponytail's opening rung: does this need to exist at all?** Is there an existing feature, a config change, or a native platform behavior that already covers the case? If it's speculative, say so in one line and stop before you spend a ticket on it. YAGNI is cheapest right here, at the start.
+
+If it survives that, ask (these are the fast factual questions — the real design gets grilled in `/work-ticket`):
 1. What does this feature do? (one sentence)
 2. Which surfaces? ({{SURFACES}})
 3. Empty state? Loading state? Error state?

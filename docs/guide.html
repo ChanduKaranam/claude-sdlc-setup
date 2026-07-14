@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-SDLC — Operating Manual</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+  img, svg { max-width: 100%; }
+
+  :root {
+    --paper:      #E9ECEE;
+    --surface:    #DFE4E7;
+    --surface-2:  #D4DBDF;
+    --ink:        #11161A;
+    --steel:      #5E6B73;
+    --hairline:   #C2CBD1;
+    --signal:     #C4362C;
+    --signal-bg:  #F6E3E1;
+    --verify:     #12674D;
+    --verify-bg:  #DDEBE5;
+
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+    --measure: 66ch;
+    --rail: 148px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:      #0E1317;
+      --surface:    #151C21;
+      --surface-2:  #1D262C;
+      --ink:        #DDE4E8;
+      --steel:      #7F8E97;
+      --hairline:   #2A353C;
+      --signal:     #FF6154;
+      --signal-bg:  #2A1614;
+      --verify:     #3FB994;
+      --verify-bg:  #10261F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0E1317;
+    --surface:    #151C21;
+    --surface-2:  #1D262C;
+    --ink:        #DDE4E8;
+    --steel:      #7F8E97;
+    --hairline:   #2A353C;
+    --signal:     #FF6154;
+    --signal-bg:  #2A1614;
+    --verify:     #3FB994;
+    --verify-bg:  #10261F;
+  }
+  :root[data-theme="light"] {
+    --paper:      #E9ECEE;
+    --surface:    #DFE4E7;
+    --surface-2:  #D4DBDF;
+    --ink:        #11161A;
+    --steel:      #5E6B73;
+    --hairline:   #C2CBD1;
+    --signal:     #C4362C;
+    --signal-bg:  #F6E3E1;
+    --verify:     #12674D;
+    --verify-bg:  #DDEBE5;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 28px 140px;
+  }
+
+  /* ---------- shared type ---------- */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  h2 {
+    font-family: var(--mono);
+    font-size: clamp(20px, 2.4vw, 25px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+  p { max-width: var(--measure); margin: 0; }
+  .lede { font-size: 19px; color: var(--ink); }
+  .muted { color: var(--steel); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  a { color: var(--ink); text-decoration-color: var(--steel); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  section { padding: 72px 0; border-top: 1px solid var(--hairline); }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 96px 0 76px; border-top: 0; }
+  .hero-mark {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--signal);
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(30px, 5.4vw, 58px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin: 0 0 28px;
+    max-width: 17ch;
+    text-wrap: balance;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--signal);
+  }
+  .hero .lede { max-width: 60ch; }
+
+  .chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 44px;
+    padding-top: 28px;
+    border-top: 1px solid var(--hairline);
+  }
+  .chain-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    color: var(--steel);
+  }
+  .chain-item b { color: var(--ink); font-weight: 700; }
+  .chain-arrow { color: var(--steel); align-self: center; font-family: var(--mono); }
+
+  /* ---------- numbered install steps ---------- */
+  .steps { display: flex; flex-direction: column; gap: 4px; }
+  .step {
+    display: grid;
+    grid-template-columns: var(--rail) 1fr;
+    gap: 32px;
+    padding: 30px 0;
+    border-top: 1px solid var(--hairline);
+    align-items: start;
+  }
+  .step:first-child { border-top: 0; }
+  .step-n {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--signal);
+    padding-top: 4px;
+  }
+  /* Grid children default to min-width:auto, which lets a wide <pre> push the
+     column past 1fr and scroll the whole page sideways. Zero it so the code
+     block scrolls inside itself instead. */
+  .step-body, .node-body, .card, .law-text, .rung-t { min-width: 0; }
+
+  .step-body { display: flex; flex-direction: column; gap: 14px; }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.7;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--steel);
+    padding: 16px 18px;
+    margin: 0;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  pre .c { color: var(--steel); }
+  pre .k { color: var(--signal); font-weight: 700; }
+  pre .g { color: var(--verify); }
+
+  /* ---------- track toggle ---------- */
+  .toggle {
+    display: inline-flex;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: 3px;
+    gap: 3px;
+  }
+  .toggle button {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 0;
+    background: transparent;
+    color: var(--steel);
+    cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ---------- the rail ---------- */
+  .rail { display: flex; flex-direction: column; }
+  .node {
+    display: grid;
+    grid-template-columns: var(--rail) 1fr;
+    gap: 32px;
+    align-items: stretch;
+  }
+  .node[hidden] { display: none; }
+
+  .node-rail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 34px 0 34px;
+    text-align: right;
+  }
+  /* the connecting line — centred in the 32px gap */
+  .node-rail::before {
+    content: "";
+    position: absolute;
+    right: -16px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--hairline);
+  }
+  .node.is-first .node-rail::before { top: 40px; }
+  .node.is-last .node-rail::before { bottom: calc(100% - 40px); }
+  /* the state dot, sitting on the line */
+  .node-rail::after {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: 36px;
+    width: 10px;
+    height: 10px;
+    background: var(--signal);
+    border-radius: 50%;
+    box-shadow: 0 0 0 5px var(--paper);
+    z-index: 1;
+  }
+  .status {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--steel);
+    line-height: 1.5;
+  }
+  .status b { display: block; color: var(--ink); }
+
+  .node-body {
+    padding: 30px 0 42px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .node.is-first .node-body { border-top: 0; }
+
+  .cmd {
+    font-family: var(--mono);
+    font-size: clamp(17px, 2vw, 21px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cmd .arg { color: var(--steel); font-weight: 400; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border: 1px solid var(--hairline);
+    color: var(--steel);
+    white-space: nowrap;
+  }
+  .tag.lead { color: var(--signal); border-color: var(--signal); }
+  .tag.build { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+
+  .runs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 4px;
+  }
+  .skill {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 5px 9px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+  }
+  .skill::before {
+    content: attr(data-ns);
+    color: var(--steel);
+  }
+  .runs-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--steel);
+    align-self: center;
+    margin-right: 4px;
+  }
+
+  /* ---------- gate stamps (iron laws) ---------- */
+  .laws { display: grid; gap: 18px; }
+  .law {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    background: var(--signal-bg);
+    border: 1px solid var(--signal);
+    border-left-width: 4px;
+    padding: 20px 22px;
+    align-items: start;
+  }
+  .law-x {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--signal);
+    letter-spacing: 0.08em;
+    padding-top: 2px;
+    white-space: nowrap;
+  }
+  .law-text { display: flex; flex-direction: column; gap: 8px; }
+  .law-text strong {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  .law-text p { font-size: 15.5px; color: var(--ink); }
+  .law-text .who {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--signal);
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- ladder ---------- */
+  .ladder { display: flex; flex-direction: column; border: 1px solid var(--hairline); }
+  .rung {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--surface);
+    align-items: baseline;
+  }
+  .rung:last-child { border-bottom: 0; background: var(--surface-2); }
+  .rung-n {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--steel);
+  }
+  .rung:last-child .rung-n { color: var(--signal); }
+  .rung-t { font-size: 15.5px; }
+  .rung-t b { font-weight: 600; }
+
+  /* ---------- two-col ---------- */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .card {
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
+  .card li { font-size: 15.5px; }
+
+  /* ---------- files ---------- */
+  .tree {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.85;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--steel);
+    padding: 22px 24px;
+    overflow-x: auto;
+    white-space: pre;   /* a div collapses newlines; the tree is preformatted */
+  }
+  .tree .d { color: var(--ink); font-weight: 700; }
+  .tree .n { color: var(--steel); }
+
+  .prose-stack { display: flex; flex-direction: column; gap: 22px; }
+
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding: 40px 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--steel);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* A 148px rail plus a readable measure runs out of room well before 760px. */
+  @media (max-width: 900px) {
+    :root { --rail: 0px; }
+    body { font-size: 16px; }
+    .wrap { padding: 0 20px 100px; }
+    .step, .node { grid-template-columns: 1fr; gap: 10px; }
+    .step { padding: 26px 0; }
+    .node-rail {
+      align-items: flex-start;
+      text-align: left;
+      padding: 26px 0 0 22px;
+    }
+    .node-rail::before { right: auto; left: 0; }
+    .node-rail::after { right: auto; left: -4px; top: 30px; }
+    .node-body { padding: 12px 0 36px 22px; border-top: 0; }
+    .node.is-first .node-rail::before { top: 30px; }
+    .node.is-last .node-rail::before { bottom: auto; height: 30px; }
+    .cols { grid-template-columns: 1fr; }
+    .law { grid-template-columns: 1fr; gap: 10px; }
+    .toggle { width: 100%; }
+    .toggle button { flex: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="hero-mark">claude-sdlc-setup · operating manual</div>
+    <h1>Claude doesn't improvise your process. It <em>runs</em> one.</h1>
+    <p class="lede">Every phase of this pipeline invokes a real methodology — design gets brainstormed and grilled, plans get written task by task, code gets built test-first, and nothing is called done without the command output that proves it. You run six slash commands. The gates do the rest.</p>
+
+    <div class="chain">
+      <span class="chain-item">Scope</span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-item">Design</span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-item">Plan</span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-item"><b>Build</b></span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-item">Ship</span>
+    </div>
+  </header>
+
+  <!-- ================= INSTALL ================= -->
+  <section id="install">
+    <div class="sec-head">
+      <div class="eyebrow">Part one</div>
+      <h2>Set it up once</h2>
+      <p class="muted">Three steps, about five minutes. You install the <code>/setup</code> skill globally; it scaffolds each repo you point it at.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">STEP 01</div>
+        <div class="step-body">
+          <h3>Install the skill</h3>
+          <p class="muted">Run one of these in a terminal. It drops the skill into <code>~/.claude/skills/setup/</code> and registers the <code>/setup</code> trigger.</p>
+<pre><span class="c"># macOS / Linux</span>
+curl -fsSL https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/install.sh | sh
+
+<span class="c"># Windows (PowerShell)</span>
+irm https://raw.githubusercontent.com/ChanduKaranam/claude-sdlc-setup/main/install.ps1 | iex</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">STEP 02</div>
+        <div class="step-body">
+          <h3>Scaffold a repo</h3>
+          <p class="muted">Open any project in Claude Code and type <code>/setup</code>. It detects your stack, runs a short interview (branches, team size, aesthetic, roster), shows you the exact file list, and writes nothing until you approve it. It never overwrites a file that already exists.</p>
+<pre>/setup</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-n">STEP 03</div>
+        <div class="step-body">
+          <h3>Let the plugins load</h3>
+          <p class="muted">The commands run on two plugins — <b>superpowers</b> (brainstorming, TDD, debugging, verification, code review) and <b>ponytail</b> (the YAGNI ladder). The <code>settings.json</code> that <code>/setup</code> writes declares both, so Claude Code offers to install them on your next session in that repo. Your teammates get the same offer when they clone it.</p>
+          <p class="muted">Restart Claude Code, then start your first feature. Until the plugins load, the commands can't call what they depend on.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHAT YOU GET ================= -->
+  <section id="scaffold">
+    <div class="sec-head">
+      <div class="eyebrow">Part two</div>
+      <h2>What /setup writes</h2>
+      <p class="muted">All of it tailored to your stack by the interview. Nothing is generated that has no consumer — no forms skill if nothing renders a form.</p>
+    </div>
+
+    <div class="tree">
+<span class="d">CLAUDE.md</span>                  <span class="n">read every session · the process rules live here</span>
+<span class="d">.claude/</span>
+  <span class="d">commands/</span>             <span class="n">the slash commands below</span>
+  <span class="d">agents/</span>               <span class="n">code-reviewer, api-builder, schema-designer…</span>
+  <span class="d">skills/</span>               <span class="n">your conventions + the grilling skill</span>
+  <span class="d">rules/</span>                <span class="n">path-scoped rules, one per surface</span>
+  <span class="d">hooks/</span>                <span class="n">protected-branch guard, session snapshots</span>
+  <span class="d">settings.json</span>         <span class="n">permissions, hooks, plugin declarations</span>
+<span class="d">docs/</span>
+  <span class="d">tickets/</span>              <span class="n">one file per feature — the design AND the plan</span>
+  <span class="d">STATE.md</span>              <span class="n">where the current session left off</span>
+  <span class="d">PLAYBOOK.md</span>           <span class="n">for humans, not Claude</span>
+  <span class="d">decisions/</span>            <span class="n">ADRs</span></div>
+
+    <div class="prose-stack" style="margin-top:32px">
+      <p class="muted"><b>The ticket is the artifact.</b> Not a scratch note — it carries the design, the API contracts, the test plan, and an <code>## Implementation Plan</code> of numbered tasks. <code>/build-ticket</code> executes that plan literally, which is why a vague plan becomes a vague feature, and why a plan containing "TBD" gets rejected outright.</p>
+    </div>
+  </section>
+
+  <!-- ================= PIPELINE ================= -->
+  <section id="pipeline">
+    <div class="sec-head">
+      <div class="eyebrow">Part three</div>
+      <h2>The pipeline</h2>
+      <p class="muted">Each command moves the ticket to a new state and runs the skills listed under it. Pick your track — solo skips the review gates, because there's no second person to hold them.</p>
+      <div class="toggle" role="group" aria-label="Choose your track" style="margin-top:8px">
+        <button type="button" data-track="team" aria-pressed="true">Team · 10 commands</button>
+        <button type="button" data-track="solo" aria-pressed="false">Solo · 6 commands</button>
+      </div>
+    </div>
+
+    <div class="rail" id="rail">
+
+      <!-- new-feature -->
+      <article class="node" data-tracks="team solo">
+        <div class="node-rail">
+          <div class="status"><b>→ TODO</b>ticket created</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/new-feature <span class="arg">{slug}</span></div>
+          <p>Scopes the feature and writes the ticket. It opens by asking whether the feature needs to exist at all — an existing screen, a config change, or a platform behavior that already covers the case is cheaper than any ticket. If it survives that, a short batched interview captures who it's for, which surfaces it touches, and what the empty, loading and error states do.</p>
+          <p class="muted">It scaffolds. It does not design, and it does not build. If a decision can't be made yet, it defers to grooming — not to build time.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="ponytail:">ponytail</span>
+            <span class="skill muted" style="border-style:dashed">rung 1 — does this need to exist?</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- groom-ticket (team) -->
+      <article class="node" data-tracks="team">
+        <div class="node-rail">
+          <div class="status"><b>TODO → GROOMED</b>design + plan written</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/groom-ticket <span class="arg">{id}</span></div>
+          <p>The deep design pass, and the longest command in the system. Rounds one through four cover the UI walkthrough, the data model, the API contracts and the test scenarios. Round five — risks, dependencies, rollback — is <b>grilled</b>: one question at a time, each with a recommended answer, and facts get looked up rather than asked. It stops when you say you've reached shared understanding, not at a question count.</p>
+          <p>Then it writes the <code>## Implementation Plan</code> into the ticket: global constraints copied verbatim, and one task per test cycle with exact file paths, exact signatures, and steps in strict test-first order.</p>
+          <p class="muted">No code here. Not a stub, not a "quick sketch to check the shape".</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">brainstorming</span>
+            <span class="skill">grilling</span>
+            <span class="skill" data-ns="superpowers:">writing-plans</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- work-ticket (solo) -->
+      <article class="node" data-tracks="solo">
+        <div class="node-rail">
+          <div class="status"><b>→ IN_PROGRESS</b>design + plan written</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/work-ticket <span class="arg">{slug}</span></div>
+          <p>Grooming and claiming, merged. It fills the design sections the scaffold left blank — data model, API shapes, every component state, the test plan — then grills the risks one question at a time, then writes the <code>## Implementation Plan</code>.</p>
+          <p class="muted">This is the only design gate in the solo track, so it carries the weight that grooming <em>and</em> lead review carry for a team. Nobody else is going to catch a bad design. Don't rush it.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">brainstorming</span>
+            <span class="skill">grilling</span>
+            <span class="skill" data-ns="superpowers:">writing-plans</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- review-ticket -->
+      <article class="node" data-tracks="team">
+        <div class="node-rail">
+          <div class="status"><b>GROOMED → APPROVED</b>or CHANGES_REQUESTED</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/review-ticket <span class="arg">{id}</span> <span class="tag lead">Leads only</span></div>
+          <p>The last gate before code exists — a design flaw caught here costs one conversation; caught after the branch is built it costs the branch. The lead is grilled through the data model, the contracts, the test coverage and the rollback plan. Then a second lens runs over the implementation plan hunting only for what should be <em>cut</em>: an abstraction with one implementation, a dependency added for what five lines do, scaffolding for a future nobody asked for.</p>
+          <p class="muted">Feedback comes back numbered and specific. When the dev re-grooms, they work through it item by item — verifying each against the actual code, pushing back with reasoning where the lead is wrong.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill">grilling</span>
+            <span class="skill" data-ns="ponytail:">ponytail-review</span>
+            <span class="skill" data-ns="superpowers:">receiving-code-review</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- claim-ticket -->
+      <article class="node" data-tracks="team">
+        <div class="node-rail">
+          <div class="status"><b>APPROVED → IN_PROGRESS</b>claimed by you</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/claim-ticket <span class="arg">{id}</span></div>
+          <p>Takes an approved ticket off the queue, sets up an isolated workspace, and records the claim so nobody else picks it up. It refuses anything that hasn't cleared lead review — the approval gate has no bypass, including for the person who wrote the ticket.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">using-git-worktrees</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- build-ticket -->
+      <article class="node" data-tracks="team solo">
+        <div class="node-rail">
+          <div class="status"><b>IN_PROGRESS</b>code gets written</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/build-ticket <span class="arg">{slug}</span> <span class="tag build">This is where code happens</span></div>
+          <p>Everything before this was design. This command takes an isolated workspace, runs the suite once to prove the baseline is green, then walks the ticket's plan task by task:</p>
+<pre><span class="k">RED</span>    write the failing test — run it — <span class="k">confirm it fails for the right reason</span>
+<span class="g">GREEN</span>  minimal code to pass — run it — <span class="g">confirm the output is pristine</span>
+       refactor · commit · review the diff · next task</pre>
+          <p>You'll be offered two modes. <b>Subagent-driven</b> spins up a fresh agent per task and reviews each one as it lands — the default, and usually right. <b>Inline</b> keeps everything in your session if you want to watch closely.</p>
+          <p class="muted">If something breaks it finds the root cause instead of stacking fixes. If three fixes have failed, it stops and tells you the design is wrong — it does not attempt a fourth.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">subagent-driven-development</span>
+            <span class="skill" data-ns="superpowers:">test-driven-development</span>
+            <span class="skill" data-ns="superpowers:">systematic-debugging</span>
+            <span class="skill" data-ns="superpowers:">requesting-code-review</span>
+            <span class="skill" data-ns="ponytail:">ponytail</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- complete-feature -->
+      <article class="node" data-tracks="team solo">
+        <div class="node-rail">
+          <div class="status"><b>→ READY_FOR_REVIEW</b>PR opened</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/complete-feature <span class="arg">{slug}</span></div>
+          <p>The pre-merge gate. Every checkbox here demands the command output that proves it, <em>in the message that claims it</em> — "it passed in build" doesn't count, and neither does "should be fine". Tests, lint, types, the test-plan files actually existing on disk.</p>
+          <p>Two reviews run on the diff. One hunts correctness bugs. The other hunts only for what should be deleted. Then every deliberate shortcut you left behind gets harvested into the PR body with its ceiling and its upgrade trigger, so the corners you cut are visible to whoever merges.</p>
+          <p class="muted">A failing test is a debugging job, not a <code>.skip</code> job. The PR does not open while anything is red.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">verification-before-completion</span>
+            <span class="skill" data-ns="superpowers:">requesting-code-review</span>
+            <span class="skill" data-ns="ponytail:">ponytail-review</span>
+            <span class="skill" data-ns="ponytail:">ponytail-debt</span>
+            <span class="skill" data-ns="superpowers:">finishing-a-development-branch</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- deploys -->
+      <article class="node" data-tracks="team">
+        <div class="node-rail">
+          <div class="status"><b>MERGED → DEPLOYED</b>promotion</div>
+        </div>
+        <div class="node-body">
+          <div class="cmd">/dev-deploy <span class="arg">·</span> /prod-deploy</div>
+          <p>Promote the integration branch to dev, then dev to production with a version tag. Production has a hard CI gate: red on the source branch and the PR doesn't open.</p>
+          <p class="muted">After either merge, the smoke test is not a checkbox. Hit the deployed thing — health, one real read, one real write — and read the responses. A green pipeline proves the pipeline ran, not that the app serves traffic.</p>
+          <div class="runs">
+            <span class="runs-label">Runs</span>
+            <span class="skill" data-ns="superpowers:">verification-before-completion</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- pause / resume -->
+    <div class="cols" style="margin-top:52px">
+      <div class="card">
+        <h3>/handoff</h3>
+        <p class="muted">Pauses mid-build. It runs the tests <em>before</em> writing down what's done, so the state file is true rather than optimistic. A half-finished file is marked in progress, not done. A red suite goes in the blockers list, not left out because you meant to fix it next session.</p>
+      </div>
+      <div class="card">
+        <h3>/resume-session</h3>
+        <p class="muted">Restores context from where you left off. If there were blockers, it debugs them first — a blocker is the reason the last session stopped, not a note to route around. On GO it hands straight back to <code>/build-ticket</code>, which picks the plan up mid-flight.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FIRST FEATURE ================= -->
+  <section id="first">
+    <div class="sec-head">
+      <div class="eyebrow">Part four</div>
+      <h2>Your first feature, end to end</h2>
+      <p class="muted">What you actually type, and what happens between the lines. Solo track shown; a team inserts grooming, lead review and a claim before the build.</p>
+    </div>
+
+<pre><span class="c">── design ──────────────────────────────────────────────</span>
+/new-feature saved-searches
+   <span class="c">↳ answers the scope questions. ticket written. no code.</span>
+
+/work-ticket saved-searches
+   <span class="c">↳ designs it, grills the risks one question at a time,</span>
+   <span class="c">  then writes the Implementation Plan into the ticket.</span>
+   <span class="c">  read that plan before you continue. it is the contract.</span>
+
+<span class="c">── build ───────────────────────────────────────────────</span>
+/build-ticket saved-searches
+   <span class="c">↳ pick subagent-driven when it asks.</span>
+   <span class="c">  then it runs, task by task:</span>
+       <span class="k">✗ FAIL</span>  test written first, and it fails
+       <span class="g">✓ PASS</span>  minimal code makes it pass
+              committed · reviewed · next task
+
+   <span class="c">↳ stepping away? /handoff — it verifies before it writes.</span>
+   <span class="c">  coming back?   /resume-session</span>
+
+<span class="c">── ship ────────────────────────────────────────────────</span>
+/complete-feature saved-searches
+   <span class="c">↳ every gate produces its own evidence.</span>
+   <span class="c">  two reviews on the diff. shortcuts surfaced. PR opened.</span></pre>
+
+    <div class="prose-stack" style="margin-top:36px">
+      <p><b>The one thing people get wrong:</b> treating the plan as a formality and moving on. <code>/build-ticket</code> executes those tasks literally — the file paths, the signatures, the order. Fifteen minutes spent reading the plan when grooming ends is the highest-leverage time in the whole cycle. If the plan is wrong, go back and fix the plan. Do not fix it inline and build from your own version.</p>
+    </div>
+  </section>
+
+  <!-- ================= IRON LAWS ================= -->
+  <section id="laws">
+    <div class="sec-head">
+      <div class="eyebrow">Part five</div>
+      <h2>The four things it won't let you do</h2>
+      <p class="muted">These aren't style guidance. They're the gates — the commands stop rather than proceed past them.</p>
+    </div>
+
+    <div class="laws">
+      <div class="law">
+        <div class="law-x">⨯ BLOCKED</div>
+        <div class="law-text">
+          <strong>No production code without a failing test first</strong>
+          <p>Write the test, run it, watch it fail <em>for the right reason</em> — a test that fails on a typo is not a red test. Only then write the code. If code got written before its test, it gets deleted. Not kept as reference, not adapted.</p>
+          <div class="who">/build-ticket · test-driven-development</div>
+        </div>
+      </div>
+
+      <div class="law">
+        <div class="law-x">⨯ BLOCKED</div>
+        <div class="law-text">
+          <strong>No fixes without root cause investigation first</strong>
+          <p>Reproduce it before you theorize. One hypothesis, one variable, one smallest-possible change — never stack fixes on top of each other. And after three failed fixes it stops entirely: the design is wrong, not the code, and fix number four won't find that out.</p>
+          <div class="who">/build-ticket · /resume-session · systematic-debugging</div>
+        </div>
+      </div>
+
+      <div class="law">
+        <div class="law-x">⨯ BLOCKED</div>
+        <div class="law-text">
+          <strong>No completion claims without fresh verification evidence</strong>
+          <p>If the command wasn't run in the message making the claim, the claim can't be made. Not "I ran it earlier". Not "it should pass". A checkbox ticked without running its command is a lie in a file that outlives you.</p>
+          <div class="who">/complete-feature · /handoff · the deploys</div>
+        </div>
+      </div>
+
+      <div class="law">
+        <div class="law-x">⨯ BLOCKED</div>
+        <div class="law-text">
+          <strong>No code during design</strong>
+          <p>Grooming designs. It does not stub, sketch, or scaffold "just to check the shape". And no plan ships with a TBD in it — <code>/build-ticket</code> refuses the ticket, because an unresolved decision does not get more resolved by having code written around it.</p>
+          <div class="who">/groom-ticket · /work-ticket · brainstorming</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LADDER ================= -->
+  <section id="ladder">
+    <div class="sec-head">
+      <div class="eyebrow">Part six</div>
+      <h2>The ladder, before every diff</h2>
+      <p class="muted">Ponytail runs across the whole pipeline. Before writing anything, it climbs — and stops at the first rung that holds.</p>
+    </div>
+
+    <div class="ladder">
+      <div class="rung"><div class="rung-n">01</div><div class="rung-t"><b>Does this need to exist at all?</b> Speculative work gets skipped, and said so in one line.</div></div>
+      <div class="rung"><div class="rung-n">02</div><div class="rung-t"><b>Is it already in this codebase?</b> Grep before you write. Re-implementing what lives two files over is the most common failure.</div></div>
+      <div class="rung"><div class="rung-n">03</div><div class="rung-t"><b>Does the standard library do it?</b></div></div>
+      <div class="rung"><div class="rung-n">04</div><div class="rung-t"><b>Does a native platform feature cover it?</b> A date input over a picker library. A database constraint over application code.</div></div>
+      <div class="rung"><div class="rung-n">05</div><div class="rung-t"><b>Does something already installed solve it?</b> Never add a dependency for what a few lines do.</div></div>
+      <div class="rung"><div class="rung-n">06</div><div class="rung-t"><b>Can it be one line?</b> Then it's one line.</div></div>
+      <div class="rung"><div class="rung-n">07</div><div class="rung-t"><b>Only then:</b> the minimum code that works.</div></div>
+    </div>
+
+    <div class="cols" style="margin-top:32px">
+      <div class="card">
+        <h3>Shortcuts are tracked, not hidden</h3>
+        <p class="muted">When a corner is deliberately cut, it leaves a marker naming the ceiling and what would trigger the upgrade. <code>/complete-feature</code> harvests every one of them into the PR body, so the reviewer sees the cost, not just the code.</p>
+<pre><span class="c">// ponytail: in-memory cache, move to
+// Redis if this goes multi-instance</span></pre>
+      </div>
+      <div class="card">
+        <h3>Where it is never lazy</h3>
+        <ul>
+          <li>Input validation at trust boundaries</li>
+          <li>Error handling that prevents data loss</li>
+          <li>Security</li>
+          <li>Accessibility basics</li>
+          <li>Anything you explicitly asked for</li>
+        </ul>
+        <p class="muted">And never lazy about understanding the problem. The ladder shortens the solution, never the reading.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>claude-sdlc-setup · /setup → /new-feature</span>
+    <span>Design → Plan → Build → Ship</span>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.toggle button');
+    var nodes = document.querySelectorAll('#rail .node');
+
+    function apply(track) {
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.track === track));
+      });
+
+      var visible = [];
+      nodes.forEach(function (n) {
+        var tracks = (n.dataset.tracks || '').split(' ');
+        n.hidden = tracks.indexOf(track) === -1;
+        n.classList.remove('is-first', 'is-last');
+        if (!n.hidden) visible.push(n);
+      });
+
+      // The rail's line caps have to follow the visible sequence, not the DOM.
+      if (visible.length) {
+        visible[0].classList.add('is-first');
+        visible[visible.length - 1].classList.add('is-last');
+      }
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.dataset.track); });
+    });
+
+    apply('team');
+  })();
+</script>
+
+</body>
+</html>

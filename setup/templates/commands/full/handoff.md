@@ -18,6 +18,20 @@ git status --short
 tail -30 docs/sessions/changes.log 2>/dev/null
 ```
 
+## Step 1b — Verify before you write it down
+
+**Invoke the `superpowers:verification-before-completion` skill.**
+
+Everything you are about to write into STATE.md will be read by someone (possibly you, next week) as fact. "Tests pass", "the API layer is done", "just the UI left" — a future dev will act on those without re-checking. So do not write them from memory.
+
+Run the checks whose results you intend to claim, **in this message**, and read the output:
+
+```bash
+{{TEST_CMD}}
+```
+
+If a file is half-finished, its status is `IN_PROGRESS`, not `DONE`. If the suite is red, that goes in `blockers:`, not left out because you meant to fix it next session. A handoff that overstates progress is worse than no handoff — the next dev builds on a floor that isn't there.
+
 ## Step 2 — Write docs/STATE.md
 
 ```yaml

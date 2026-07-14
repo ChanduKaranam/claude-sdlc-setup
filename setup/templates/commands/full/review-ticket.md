@@ -29,23 +29,35 @@ Read `docs/tickets/$ARGUMENTS-*.md` in full — all sections.
 
 ## Step 2 — ENTER PLAN MODE for lead review
 
-Ask the lead 1–3 focused questions about the ticket design (batched via AskUserQuestion). Focus on:
-- Data model correctness and migration safety
-- API contract completeness (missing endpoints? wrong error codes?)
-- Test plan gaps (missing test layers for the complexity level?)
-- Risk assessment (are blockers identified? rollback plan realistic?)
+This is the last gate before code exists. It is worth being slow here — a design flaw caught now costs one conversation; caught in `/complete-feature` it costs the branch.
 
-Present a summary of the design for quick approval:
+**Invoke the `grilling` skill.** One question at a time, each carrying your recommended answer, walking the decision tree branch by branch. Anything you can *look up* — the current schema, existing endpoints, what the migration actually does, whether that component already exists — you look up. You only ask the lead about *decisions*.
+
+Grill across:
+- **Data model** — correctness, migration safety, reversibility, indexes on new FKs.
+- **API contracts** — completeness (missing endpoints? wrong error codes?), envelope conformance, permissions, idempotency.
+- **Test plan** — gaps. Does the layer coverage match the complexity? Is anything marked `N/A` that shouldn't be?
+- **Risk** — are the real blockers identified, or only the comfortable ones? Is the rollback plan something you could actually execute at 3am?
+
+Then apply a second lens to the `## Implementation Plan`:
+
+**Invoke the `ponytail:ponytail-review` skill** on it. Not for correctness — purely for what should be cut. Is a task building an abstraction with one implementation? Adding a dependency for what a few lines do? Reinventing something the codebase or the stdlib already has? Scaffolding for a future nobody has asked for? The cheapest task is the one that gets deleted at review.
+
+Present the summary for the decision:
 ```
 ## Design Summary: $ARGUMENTS
 Goal: {one line}
 Data model changes: {brief}
 Endpoints: {count + list}
 Test plan: {layers + paths}
+Implementation Plan: {N tasks}
 Risks: {brief}
+Cuts proposed: {from ponytail-review, or "none — lean already"}
 ```
 
 Ask: "Approve this design, or request changes?"
+
+Do not act on it until the lead confirms. Grilling's exit condition is shared understanding, not a question count.
 
 ## Step 3 — EXIT PLAN MODE
 
@@ -72,5 +84,6 @@ Print outcome summary and next steps (who needs to act).
 ## Notes for Claude
 
 - Identity check is non-negotiable. No bypasses.
-- Feedback must be numbered and specific — "unclear" is not actionable.
+- Feedback must be numbered and specific — "unclear" is not actionable. The dev will run `superpowers:receiving-code-review` against this feedback, and that skill requires each item to be verifiable against the code. Write items that can be verified.
 - Preserve all prior Lead Feedback sections verbatim when adding a new one.
+- Approving a ticket with a TBD in its `## Implementation Plan` means approving a vague feature. `/build-ticket` will reject it anyway — catch it here.

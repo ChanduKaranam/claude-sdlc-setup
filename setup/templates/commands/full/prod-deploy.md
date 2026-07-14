@@ -54,9 +54,20 @@ EOF
 
 Print PR URL. Remind: 4-step post-merge sequence (merge → tag → push tag → gh release).
 
+## Step 6 — After the merge: verify production, do not assume it
+
+**Invoke the `superpowers:verification-before-completion` skill.**
+
+> NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.
+
+Hit production. Health endpoint, one real read path, and — if the release touched writes — one real write path. Read the actual responses and paste them. A green pipeline proves the pipeline ran. It does not prove the app serves traffic.
+
+If any of it is wrong, the rollback plan in the ticket's `## Risks, Dependencies, Rollback` is the plan. Execute it; do not debug forward in production.
+
 ---
 
 ## Notes for Claude
 
 - HARD CI gate: do not open the PR if CI is red on {{DEV_BRANCH}}.
+- A release is verified against production, not against the deploy log.
 - Never push directly to {{PROD_BRANCH}} — the hook blocks it.

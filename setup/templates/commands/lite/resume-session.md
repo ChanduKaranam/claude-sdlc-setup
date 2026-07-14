@@ -48,11 +48,21 @@ git status
 
 Read every file listed under "Files in Progress" in STATE.md.
 
+## Step 4b — If there are blockers, they are the work
+
+If `blockers:` in STATE.md is non-empty, **invoke the `superpowers:systematic-debugging` skill** before anything else. A blocker is not a note to route around; it is the reason the last session stopped.
+
+> NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.
+
+Reproduce it consistently before you theorise. One hypothesis, one variable, one smallest-possible change. If three fixes have already failed — check the ticket's `## Delays & Blockers` for that history — **stop and question the design**, do not attempt fix number four.
+
 ## Step 5 — Confirm before acting
 
 > "Context restored. Ready to continue: {next action}. Type GO to proceed."
 
 Do NOT start work until the developer types GO.
+
+On GO: if the next action is implementation, run **`/build-ticket {slug}`** — do not start writing code inline. `/build-ticket` picks the plan back up under TDD and keeps the RED-before-GREEN cycle intact. If the ticket was mid-flight under `superpowers:subagent-driven-development`, its progress ledger at `.superpowers/sdd/progress.md` records which tasks are already done — check it and resume from there.
 
 ---
 
@@ -60,3 +70,4 @@ Do NOT start work until the developer types GO.
 
 - Never silently take over another dev's claim. Always ask.
 - The takeover audit line in _takeovers.log is non-negotiable.
+- STATE.md is a claim, not a proof. Before you build on "the API layer is done", run the tests once and see for yourself.

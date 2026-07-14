@@ -6,6 +6,55 @@ Running `/setup` in Claude Code will interview you about your project, analyze t
 
 ---
 
+## 📖 Start here — read the guide
+
+**[`docs/guide.html`](docs/guide.html)** is the operating manual. Open it in a browser (it's one self-contained file — no build step, no network):
+
+```sh
+open docs/guide.html          # macOS
+xdg-open docs/guide.html      # Linux
+start docs/guide.html         # Windows
+```
+
+It walks through the whole process end to end: how to install, what `/setup` writes, every slash command and the skills it runs, a worked example of your first feature from scope to merged PR, and the four gates that will stop you. If you only read one thing before running `/setup`, read that.
+
+---
+
+The generated pipeline doesn't improvise a process. Every phase runs a real methodology:
+
+| Phase | Command | What it runs |
+|-------|---------|--------------|
+| Scope | `/new-feature` | ponytail's first rung — does this feature need to exist at all? |
+| Design | `/groom-ticket` · `/work-ticket` | `superpowers:brainstorming`, then `grilling` for the risk round — one question at a time |
+| Plan | same command | `superpowers:writing-plans` → the ticket's `## Implementation Plan` |
+| Review | `/review-ticket` | `grilling` + `ponytail:ponytail-review` on the plan, before a line of code exists |
+| **Build** | **`/build-ticket`** | `superpowers:test-driven-development` per task — no production code without a failing test first. `systematic-debugging` when something breaks. Code review after each task. |
+| Ship | `/complete-feature` | `superpowers:verification-before-completion` — no claim without the command output that proves it, in the message that claims it |
+
+---
+
+## Prerequisites
+
+The generated commands invoke two Claude Code plugins:
+
+| Plugin | Provides |
+|--------|----------|
+| [`superpowers`](https://github.com/obra/superpowers) | brainstorming, writing-plans, TDD, systematic-debugging, verification-before-completion, code review, worktrees |
+| [`ponytail`](https://github.com/DietrichGebert/ponytail) | the YAGNI ladder, `ponytail-review`, `ponytail-debt` |
+
+**You don't need to install these yourself.** The `.claude/settings.json` that `/setup` writes declares both, so Claude Code offers to install them the next time anyone opens the repo — including your teammates. (`grilling` is vendored directly into the project as a skill, so it needs nothing.)
+
+If you'd rather have them globally, in Claude Code:
+
+```
+/plugin marketplace add anthropics/claude-plugins-official
+/plugin install superpowers@claude-plugins-official
+/plugin marketplace add DietrichGebert/ponytail
+/plugin install ponytail@ponytail
+```
+
+---
+
 ## Install
 
 ### Windows (PowerShell)
@@ -47,6 +96,8 @@ Claude will:
 3. Enter extended thinking to plan the scaffold
 4. Show you the full file list for approval
 5. Write everything — skipping files that already exist
+
+Then restart Claude Code (or run `/plugin`) so superpowers and ponytail load, and run `/new-feature`.
 
 ---
 

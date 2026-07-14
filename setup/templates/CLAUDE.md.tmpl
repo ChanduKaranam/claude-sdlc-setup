@@ -18,6 +18,19 @@
 {{COMMANDS_CHEAT_SHEET}}
 ```
 
+## Process — non-negotiable
+
+The slash commands run this chain. Do not improvise around it.
+
+**Design** (`/new-feature` → {{GROOM_STEP_REF}}): `superpowers:brainstorming` for the design, `grilling` for the risk round — one question at a time. No code during design, not even a stub.
+**Plan**: `superpowers:writing-plans` writes the ticket's `## Implementation Plan`. No TBDs — an unfilled step is a plan failure.
+**Build** (`/build-ticket`): `superpowers:test-driven-development`. **No production code without a failing test first.** Code written before its test gets deleted, not adapted. Anything breaks → `superpowers:systematic-debugging`: no fix without root cause, and three failed fixes means stop and question the design.
+**Ship** (`/complete-feature`): `superpowers:verification-before-completion`. **No completion claim without fresh evidence** — if you did not run the command in this message, you cannot say it passes.
+
+**Ponytail is active.** Before writing anything, climb the ladder: does this need to exist at all → is it already in this codebase (grep first) → stdlib → native platform feature → an already-installed dependency → one line → only then, the minimum code that works. Deliberate corner-cuts get a `// ponytail:` comment naming the ceiling and the upgrade trigger.
+
+Never lazy about: input validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly asked for.
+
 ## Code rules — non-negotiable (universal)
 
 {{CODE_RULES}}

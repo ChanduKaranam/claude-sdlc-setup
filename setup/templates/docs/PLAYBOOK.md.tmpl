@@ -8,9 +8,10 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 
 ## 2. The mental model
 
-1. **Tickets are the design artifact.** Before code, there's a ticket. Before a ticket is built, it's approved. This is the quality gate.
+1. **Tickets are the design artifact.** Before code, there's a ticket. Before a ticket is built, it's approved. The ticket carries the design *and* the implementation plan — `/build-ticket` executes that plan literally, so a vague plan becomes a vague feature.
 2. **Claude does the build; you do the decisions.** Claude writes code, commits, manages state. You answer the interview questions, approve designs, and merge PRs.
 3. **The hook system is your guardrail.** You can't accidentally push to protected branches. You can't edit committed migrations. The system prevents the costly mistakes.
+4. **The commands don't improvise a process — they run one.** Design is `superpowers:brainstorming` plus `grilling`. Planning is `superpowers:writing-plans`. Building is `superpowers:test-driven-development` (no production code without a failing test first). Shipping is `superpowers:verification-before-completion` (no claim without evidence you produced in that message). Ponytail runs across all of it: the laziest thing that actually works, and nothing built for a future nobody asked for.
 
 ## 3. Your toolkit
 
@@ -20,6 +21,7 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 | `/groom-ticket {id}` | Deep-design a ticket | Type in Claude |
 {{REVIEW_TICKET_ROW}}
 | `/claim-ticket {id}` | Pick up an approved ticket | Type in Claude |
+| `/build-ticket {slug}` | **Write the code.** Executes the ticket's Implementation Plan under TDD | Type in Claude |
 | `/complete-feature {slug}` | Pre-merge gate + PR | Type in Claude |
 | `/handoff` | Save state and pause | Type in Claude |
 | `/resume-session` | Restore context and continue | Type in Claude |
@@ -35,11 +37,13 @@ This playbook describes how humans and Claude collaborate to ship features in {{
 
 **Day 2 (build):**
 1. `/claim-ticket {id}` (or continue from yesterday's context with `--continue`)
-2. Schema first → API tests-first → API impl → Web UI → Mobile UI.
-3. After each layer: `/handoff` to save state, `git push`.
+2. `/build-ticket {slug}` — this is where code gets written. It sets up an isolated workspace, takes a clean test baseline, then walks the ticket's Implementation Plan task by task: **failing test → verify it's red → minimal code → verify it's green → commit**, with a code review after each task. If something breaks it stops and finds the root cause rather than stacking fixes; if three fixes have failed it stops and tells you the design is wrong.
+
+   You will be offered two execution modes. Subagent-driven (a fresh agent per task) is the default and usually the right call; inline keeps everything in your session if you want to watch closely.
+3. Pausing mid-build: `/handoff` runs the tests before writing down what's done, so the state file is true rather than optimistic. `/resume-session` picks it back up — and if there were blockers, it debugs them first instead of routing around them.
 
 **Day 3 (ship):**
-1. `/complete-feature {slug}` — checklist + code-reviewer agent + PR opened.
+1. `/complete-feature {slug}` — every gate here demands the command output that proves it, in the message that claims it. Two reviews run on the diff: `code-reviewer` for correctness, `ponytail-review` for what should simply be deleted. Then the PR opens.
 2. Lead reviews PR → merges to `{{PR_TARGET_BRANCH}}`.
 3. When ready for dev environment: `/dev-deploy`.
 4. When ready for prod: `/prod-deploy`.

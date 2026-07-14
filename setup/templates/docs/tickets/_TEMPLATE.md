@@ -109,6 +109,39 @@ const ResponseSchema = z.object({});
 
 ---
 
+## Implementation Plan
+
+> _Filled by `/groom-ticket` via the `superpowers:writing-plans` skill. Executed by `/build-ticket`._
+>
+> **No placeholders.** "TBD", "TODO", "add appropriate error handling", "similar to Task 1" — each of these is a plan failure, not a plan. A task is the smallest unit of work that carries its own test cycle. Steps are 2–5 minutes each.
+
+### Global Constraints
+
+> Verbatim values from the design above. These get copied word-for-word into every implementer prompt — paraphrasing a constraint is how it gets violated.
+
+- **Response envelope:** {{RESPONSE_ENVELOPE}}
+- **Validation:** {{VALIDATION_LIB}}
+- **ORM:** {{ORM}}
+- **Test command:** `{{TEST_CMD}}`
+- {other non-negotiables from Data Model / API Contracts}
+
+### Task 1: {name}
+
+**Files:** Create `{path}` · Modify `{path}` · Test `{path}`
+**Interfaces:** Consumes `{exact signature}` → Produces `{exact signature}`
+
+- [ ] Write failing test in `{path}` asserting `{specific behavior}`
+- [ ] Run `{{TEST_CMD}}` — verify RED, and that it fails for the right reason
+- [ ] Implement `{path}` — minimal code to pass
+- [ ] Run `{{TEST_CMD}}` — verify GREEN, output pristine
+- [ ] Commit `type(scope): description (TICKET-XXX)`
+
+### Task 2: {name}
+
+_(same structure — one task per test cycle)_
+
+---
+
 ## Acceptance Criteria
 
 {{ACCEPTANCE_CRITERIA}}
@@ -174,7 +207,7 @@ const ResponseSchema = z.object({});
 
 ## Verification Log
 
-Filled by `/complete-feature` — do not edit manually.
+Filled by `/build-ticket` (done gate) and `/complete-feature` (pre-merge gate), both via the `superpowers:verification-before-completion` skill — do not edit manually. Every row is a command that was actually run, with its actual output. An unrun row is an empty row, not a ticked one.
 
 | Surface | Bullet | Verified by | Date | Pass |
 |---------|--------|-------------|------|------|
